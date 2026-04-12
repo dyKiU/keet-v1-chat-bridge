@@ -1,0 +1,14 @@
+{
+  "name": "pear-keet-readonly-probe",
+  "main": "index.js",
+  "pear": {
+    "name": "pear-keet-readonly-probe",
+    "type": "terminal"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "framed-stream": "^1.0.1",
+    "pear-run": "^2.0.0",
+    "tiny-buffer-rpc": "^2.3.1"
+  }
+}

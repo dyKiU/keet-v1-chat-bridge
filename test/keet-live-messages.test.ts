@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { shouldReply } from "../src/keet-live-agent.js";
+import { collectAnswer, shouldReply, thinkingText } from "../src/keet-live-agent.js";
 import { newestSeq, summarizeKeetChatMessages } from "../src/keet-live-messages.js";
 
 test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
@@ -32,5 +32,57 @@ test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
 test("shouldReply ignores qvac-prefixed assistant replies", () => {
   assert.equal(shouldReply({ seq: 1, text: "what model are you?" }), true);
   assert.equal(shouldReply({ seq: 2, text: "[qvac] qwen3-4b" }), false);
+  assert.equal(shouldReply({ seq: 4, text: thinkingText() }), false);
   assert.equal(shouldReply({ seq: 3, text: "   " }), false);
 });
+
+test("collectAnswer does not show thinking when QVAC fails before streaming", async () => {
+  let thinkingCount = 0;
+
+  await assert.rejects(
+    collectAnswer("hello", testOpenAiOptions(), async () => {
+      thinkingCount += 1;
+    }, async function* () {
+      throw new Error("connect ECONNREFUSED");
+      yield "";
+    }),
+    /ECONNREFUSED/,
+  );
+
+  assert.equal(thinkingCount, 0);
+});
+
+test("collectAnswer skips thinking for quick responses", async () => {
+  let thinkingCount = 0;
+
+  const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {
+    thinkingCount += 1;
+  }, async function* () {
+    yield "quick";
+  });
+
+  assert.equal(answer, "quick");
+  assert.equal(thinkingCount, 0);
+});
+
+test("collectAnswer shows thinking only while waiting on a live QVAC response", async () => {
+  let thinkingCount = 0;
+
+  const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {
+    thinkingCount += 1;
+  }, async function* () {
+    yield "slow ";
+    await new Promise((resolve) => setTimeout(resolve, 850));
+    yield "answer";
+  });
+
+  assert.equal(answer, "slow answer");
+  assert.equal(thinkingCount, 1);
+});
+
+function testOpenAiOptions() {
+  return {
+    baseUrl: "http://127.0.0.1:11435/v1",
+    model: "qwen3-4b",
+  };
+}

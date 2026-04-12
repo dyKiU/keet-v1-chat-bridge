@@ -99,14 +99,16 @@ npm run dev -- keet-live-readonly-probe --timeout-ms 20000
 - Incoming message watch works:
 
 ```sh
-npm run dev -- keet-live-watch --room-id <local-keet-room-id> --poll-ms 2000
+npm run dev -- keet-live-watch --room-id <local-keet-room-id> --subscribe
 ```
 
-- `core.subscribeChatMessages(roomId)` is present and callable, but the first live probe showed that it immediately replays a full chat message array. In a 60 second test it did not emit a later update after the initial replay, so the agent keeps the polling watcher as the reliable path for now. The probe command is:
+- `core.subscribeChatMessages(roomId)` is present and callable. It immediately replays a full chat message array, then later updates arrive as full arrays too, not single-message deltas. The watcher and agent use a startup high-water mark and filter on later `seq` values. Polling with `--poll-ms 2000` remains a fallback. The probe command is:
 
 ```sh
 npm run dev -- keet-live-subscribe-probe --room-id <local-keet-room-id> --timeout-ms 60000
 ```
+
+Observed result: after the initial replay, a later message `hey subbed 2?` arrived as a new subscription event with a higher `seq`, confirming that subscription mode can replace polling for the live demo.
 
 - Sending works when the worker is kept online long enough:
 
@@ -131,13 +133,13 @@ npm run dev -- keet-live-agent \
   --base-url http://127.0.0.1:11435/v1 \
   --model qwen3-4b \
   --strip-think \
-  --poll-ms 2000
+  --subscribe
 ```
 
 The agent:
 
 - sets a high-water mark from current room messages at startup
-- polls for later messages
+- subscribes for later room snapshots and filters messages by `seq`
 - ignores empty messages and messages starting with `[qvac]`
 - sends new user messages to `/v1/chat/completions`
 - posts replies back into the Keet room with a `[qvac]` prefix
@@ -153,7 +155,7 @@ npm run keet:agent:start -- \
   --room-id <local-keet-room-id> \
   --base-url http://127.0.0.1:11435/v1 \
   --model qwen3-4b \
-  --poll-ms 2000
+  --subscribe
 ```
 
 Or use environment variables:
@@ -162,6 +164,7 @@ Or use environment variables:
 QVAC_KEET_ROOM_ID=<local-keet-room-id> \
 QVAC_BASE_URL=http://127.0.0.1:11435/v1 \
 QVAC_MODEL=qwen3-4b \
+QVAC_KEET_SUBSCRIBE=true \
 npm run keet:agent:start
 ```
 

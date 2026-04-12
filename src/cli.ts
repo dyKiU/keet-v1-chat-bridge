@@ -80,6 +80,7 @@ async function main(): Promise<void> {
       timeoutMs: options.timeoutMs,
       pollMs: options.pollMs,
       once: options.once,
+      subscribe: options.subscribe,
     });
     return;
   }
@@ -94,6 +95,7 @@ async function main(): Promise<void> {
       apiKey: options.apiKey,
       systemPrompt: options.systemPrompt,
       stripThink: options.stripThink,
+      subscribe: options.subscribe,
     });
     return;
   }

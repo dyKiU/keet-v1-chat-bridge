@@ -151,6 +151,7 @@ test("parseCliOptions configures Keet live watch command", () => {
     "--poll-ms",
     "1000",
     "--once",
+    "--subscribe",
   ]);
 
   assert.equal(options.command, "keet-live-watch");
@@ -158,6 +159,7 @@ test("parseCliOptions configures Keet live watch command", () => {
   assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
   assert.equal(options.pollMs, 1000);
   assert.equal(options.once, true);
+  assert.equal(options.subscribe, true);
 });
 
 test("parseCliOptions configures Keet live subscribe probe command", () => {
@@ -187,6 +189,7 @@ test("parseCliOptions configures Keet live agent command", () => {
     "--model",
     "qwen3-4b",
     "--strip-think",
+    "--subscribe",
   ]);
 
   assert.equal(options.command, "keet-live-agent");
@@ -196,6 +199,7 @@ test("parseCliOptions configures Keet live agent command", () => {
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");
   assert.equal(options.stripThink, true);
+  assert.equal(options.subscribe, true);
 });
 
 test("parseCliOptions requires a Keet room for welcome command", () => {

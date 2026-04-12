@@ -61,10 +61,14 @@ async function start (args) {
     '--base-url',
     args.baseUrl ?? process.env.QVAC_BASE_URL ?? 'http://127.0.0.1:11435/v1',
     '--model',
-    args.model ?? process.env.QVAC_MODEL ?? 'qwen3-4b',
-    '--poll-ms',
-    String(args.pollMs ?? process.env.QVAC_KEET_POLL_MS ?? 2000)
+    args.model ?? process.env.QVAC_MODEL ?? 'qwen3-4b'
   ]
+
+  if (args.subscribe ?? process.env.QVAC_KEET_SUBSCRIBE === 'true') {
+    agentArgs.push('--subscribe')
+  } else {
+    agentArgs.push('--poll-ms', String(args.pollMs ?? process.env.QVAC_KEET_POLL_MS ?? 2000))
+  }
 
   if (args.stripThink ?? process.env.QVAC_STRIP_THINK !== 'false') {
     agentArgs.push('--strip-think')
@@ -173,6 +177,9 @@ function parseArgs (argv) {
         args.pollMs = Number(readValue(argv, ++index, arg))
         if (!Number.isFinite(args.pollMs) || args.pollMs <= 0) throw new Error('--poll-ms requires a positive number')
         break
+      case '--subscribe':
+        args.subscribe = true
+        break
       case '--system':
         args.system = readValue(argv, ++index, arg)
         break
@@ -232,7 +239,8 @@ function usage () {
     '  --room-id <id>       local Keet room id; alternatively QVAC_KEET_ROOM_ID',
     '  --base-url <url>     default QVAC_BASE_URL or http://127.0.0.1:11435/v1',
     '  --model <name>       default QVAC_MODEL or qwen3-4b',
-    '  --poll-ms <ms>       default QVAC_KEET_POLL_MS or 2000',
+    '  --subscribe          use core.subscribeChatMessages; alternatively QVAC_KEET_SUBSCRIBE=true',
+    '  --poll-ms <ms>       polling fallback; default QVAC_KEET_POLL_MS or 2000',
     '  --system <text>      optional system prompt; alternatively QVAC_SYSTEM_PROMPT',
     '  --no-strip-think     do not pass --strip-think to the agent',
     '',

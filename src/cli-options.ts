@@ -34,6 +34,7 @@ export interface CliOptions {
   textOnly: boolean;
   stripThink: boolean;
   once: boolean;
+  subscribe: boolean;
   waitForResponse: boolean;
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
@@ -75,6 +76,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
     textOnly: false,
     stripThink: false,
     once: false,
+    subscribe: false,
     waitForResponse: false,
   };
 
@@ -151,6 +153,9 @@ export function parseCliOptions(argv: string[]): CliOptions {
       case "--once":
         options.once = true;
         break;
+      case "--subscribe":
+        options.subscribe = true;
+        break;
       case "--wait-for-response":
         options.waitForResponse = true;
         break;
@@ -201,8 +206,8 @@ export function usage(): string {
     "  keet-live-readonly-probe [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "  keet-live-send --room-id <local-keet-room-id> [--message <text>] [--linger-ms <ms>] [--wait-for-response] [--timeout-ms <ms>]",
     "  keet-live-subscribe-probe --room-id <local-keet-room-id> [--timeout-ms <ms>]",
-    "  keet-live-watch --room-id <local-keet-room-id> [--poll-ms <ms>] [--once] [--timeout-ms <ms>]",
-    "  keet-live-agent --room-id <local-keet-room-id> [--poll-ms <ms>] [--base-url <url>] [--model <name>] [--strip-think]",
+    "  keet-live-watch --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
+    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--strip-think]",
     "  keet-readonly-probe [--keet-dump <path>] [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "",
     "Defaults:",

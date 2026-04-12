@@ -6,6 +6,7 @@ export interface KeetLiveWatchOptions {
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
   once?: boolean | undefined;
+  subscribe?: boolean | undefined;
 }
 
 export async function runKeetLiveWatch(options: KeetLiveWatchOptions): Promise<number> {
@@ -29,10 +30,15 @@ export async function runKeetLiveWatch(options: KeetLiveWatchOptions): Promise<n
         mode: "watch",
         room: summarizeRoom(info),
         highSeq,
-        pollMs,
+        transport: options.subscribe ? "subscribe" : "poll",
+        pollMs: options.subscribe ? undefined : pollMs,
       }, null, 2));
 
       if (options.once) return;
+      if (options.subscribe) {
+        await watchSubscription(core.api, options.roomId, () => highSeq, (next) => { highSeq = next; }, abort.signal);
+        return;
+      }
 
       while (!abort.signal.aborted) {
         await sleep(pollMs, abort.signal);
@@ -61,6 +67,34 @@ export async function runKeetLiveWatch(options: KeetLiveWatchOptions): Promise<n
   } finally {
     abort.cleanup();
   }
+}
+
+async function watchSubscription(
+  api: any,
+  roomId: string,
+  getHighSeq: () => number,
+  setHighSeq: (seq: number) => void,
+  signal: AbortSignal,
+): Promise<void> {
+  const stream = api.core.subscribeChatMessages(roomId);
+  await new Promise<void>((resolve, reject) => {
+    const finish = () => {
+      stream.destroy();
+      resolve();
+    };
+    signal.addEventListener("abort", finish, { once: true });
+    stream.on("data", (value: unknown) => {
+      const fresh = summarizeKeetChatMessages(value)
+        .filter((message) => message.seq > getHighSeq())
+        .sort((a, b) => a.seq - b.seq);
+      for (const message of fresh) {
+        setHighSeq(Math.max(getHighSeq(), message.seq));
+        console.log(JSON.stringify({ event: "message", ...message }));
+      }
+    });
+    stream.once("error", reject);
+    stream.once("close", resolve);
+  });
 }
 
 function summarizeRoom(value: unknown): Record<string, unknown> {

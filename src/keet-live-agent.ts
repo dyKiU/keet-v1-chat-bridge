@@ -6,6 +6,7 @@ export interface KeetLiveAgentOptions extends OpenAiClientOptions {
   roomId: string;
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
+  subscribe?: boolean | undefined;
 }
 
 const ASSISTANT_PREFIX = "[qvac]";
@@ -31,9 +32,15 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
         mode: "agent",
         room: summarizeRoom(info),
         highSeq,
-        pollMs,
+        transport: options.subscribe ? "subscribe" : "poll",
+        pollMs: options.subscribe ? undefined : pollMs,
         model: options.model,
       }, null, 2));
+
+      if (options.subscribe) {
+        await agentSubscription(core.api, options, () => highSeq, (next) => { highSeq = next; }, abort.signal, timeoutMs);
+        return;
+      }
 
       while (!abort.signal.aborted) {
         await sleep(pollMs, abort.signal);
@@ -77,6 +84,52 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
   } finally {
     abort.cleanup();
   }
+}
+
+async function agentSubscription(
+  api: any,
+  options: KeetLiveAgentOptions,
+  getHighSeq: () => number,
+  setHighSeq: (seq: number) => void,
+  signal: AbortSignal,
+  timeoutMs: number,
+): Promise<void> {
+  const stream = api.core.subscribeChatMessages(options.roomId);
+  await new Promise<void>((resolve, reject) => {
+    const finish = () => {
+      stream.destroy();
+      resolve();
+    };
+    signal.addEventListener("abort", finish, { once: true });
+    stream.on("data", (value: unknown) => {
+      void (async () => {
+        const fresh = summarizeKeetChatMessages(value)
+          .filter((message) => message.seq > getHighSeq())
+          .sort((a, b) => a.seq - b.seq);
+        for (const message of fresh) {
+          setHighSeq(Math.max(getHighSeq(), message.seq));
+          console.log(JSON.stringify({ event: "message", ...message }));
+          if (!shouldReply(message)) continue;
+
+          const answer = await collectAnswer(message.text, options);
+          const text = `${ASSISTANT_PREFIX} ${answer}`;
+          const result = await withTimeout(
+            api.core.addChatMessage(options.roomId, text, {}),
+            timeoutMs,
+            "core.addChatMessage(reply)",
+          );
+          console.log(JSON.stringify({
+            event: "reply",
+            inReplyToSeq: message.seq,
+            text,
+            result: summarizeResult(result),
+          }));
+        }
+      })().catch(reject);
+    });
+    stream.once("error", reject);
+    stream.once("close", resolve);
+  });
 }
 
 export function shouldReply(message: KeetLiveChatMessage): boolean {

@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process'
 import { closeSync, openSync } from 'node:fs'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -11,7 +12,7 @@ const stateDir = path.join(rootDir, '.run', 'pear-qvac-demo')
 const stateFile = path.join(stateDir, 'state.json')
 const hostLog = path.join(stateDir, 'host.log')
 const pearLog = path.join(stateDir, 'pear.log')
-const pearBin = process.env.PEAR_BIN ?? '/Users/pj/Library/Application Support/pear/bin/pear'
+const pearBin = process.env.PEAR_BIN ?? path.join(os.homedir(), 'Library/Application Support/pear/bin/pear')
 
 const command = process.argv[2] ?? 'help'
 

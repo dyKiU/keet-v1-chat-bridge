@@ -45,14 +45,14 @@ The Pear terminal guide maps cleanly to a companion app for our own bridge proto
 ```sh
 cd pear-terminal
 npm install
-'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask .
+"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask .
 ```
 
 Copy the 64-character topic printed after `topic:` into a second Pear terminal. Use the actual topic value, without angle brackets:
 
 ```sh
 cd pear-terminal
-'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-b
+"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-b
 ```
 
 Or connect the Pear terminal client to the TypeScript QVAC host:
@@ -65,13 +65,13 @@ Copy the printed `topic:` value, then in another terminal:
 
 ```sh
 cd pear-terminal
-'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-qvac
+"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-qvac
 ```
 
 Example shape:
 
 ```sh
-'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . dc5821a19d42fae5732c8905437d84a6104e83a3ed5ede056cb5d5d1dd1fd38b --name pear-qvac
+"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . dc5821a19d42fae5732c8905437d84a6104e83a3ed5ede056cb5d5d1dd1fd38b --name pear-qvac
 ```
 
 If you see `zsh: no such file or directory: topic`, it means the placeholder was copied literally as `<topic>`. In zsh, `<topic>` is parsed as input redirection from a file named `topic`.
@@ -106,7 +106,7 @@ This is useful for local scripts, test harnesses, or a future UI process that ca
 If a UI process can run local commands, the integration point is:
 
 ```sh
-cd /Users/pj/project/qvac-hyperswarm-bridge
+cd $HOME/project/qvac-hyperswarm-bridge
 npm run dev -- post --topic PASTE_TOPIC_HERE --ask 'hello from the UI process'
 ```
 
@@ -162,7 +162,7 @@ If the phone joins that same discovery key, the probe prints a peer connection. 
 
 Observed with a real Keet chat room link:
 
-- `pear://keet/nfo6...puma6o` was decoded into three aligned z-base32 key candidates.
+- `pear://keet/<room-link>` was decoded into three aligned z-base32 key candidates.
 - Probe joined each candidate as raw key and Hypercore discovery key.
 - The stock Keet iPhone app did not connect to any candidate during the smoke test.
 
@@ -221,10 +221,10 @@ with this worker:
 /Applications/Keet.app/Contents/Resources/app/.webpack/main/workers/core/index.mjs
 ```
 
-On this machine the live Keet store was detected under the `pj` account:
+On this machine the live Keet store was detected under the local account:
 
 ```text
-/Users/pj/Library/Application Support/pear/app-storage/by-dkey/197ea022b663edbedcf0b2a0fe44ebc99c21448cb46d375ec77d95de6e0a4c1a
+$HOME/Library/Application Support/pear/app-storage/by-dkey/<detected-dkey>
 ```
 
 Before any future command opens that live store, run:

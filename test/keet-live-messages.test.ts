@@ -8,7 +8,7 @@ test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
     {
       seq: 2,
       timestamp: 1776008636099,
-      member: { displayName: "powpowpeter" },
+      member: { displayName: "test-user" },
       chat: { text: "hello" },
     },
     {
@@ -23,7 +23,7 @@ test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
   ]);
 
   assert.deepEqual(messages, [
-    { seq: 2, timestamp: 1776008636099, author: "powpowpeter", text: "hello" },
+    { seq: 2, timestamp: 1776008636099, author: "test-user", text: "hello" },
     { seq: 3, timestamp: undefined, author: "qvac", text: "[qvac] hi" },
   ]);
   assert.equal(newestSeq(messages), 3);

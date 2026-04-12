@@ -64,7 +64,7 @@ async function makeInstalledKeetFixture(): Promise<{
   await writeFile(path.join(appResourcesPath, "node_modules/@holepunchto/keet-core-api/api.json"), "[]\n");
 
   const storageRoot = path.join(root, "app-storage/by-dkey");
-  const storePath = path.join(storageRoot, "197ea022b663edbedcf0b2a0fe44ebc99c21448cb46d375ec77d95de6e0a4c1a");
+  const storePath = path.join(storageRoot, "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
   await mkdir(storePath, { recursive: true });
   await writeFile(
     path.join(storePath, "profiles.json"),

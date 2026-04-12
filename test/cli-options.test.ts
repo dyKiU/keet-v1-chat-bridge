@@ -124,7 +124,7 @@ test("parseCliOptions configures Keet live send command", () => {
   const options = parseCliOptions([
     "keet-live-send",
     "--room-id",
-    "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so",
+    "test-room-id-qvac",
     "--message",
     "hello from qvac",
     "--timeout-ms",
@@ -136,7 +136,7 @@ test("parseCliOptions configures Keet live send command", () => {
 
   assert.equal(options.command, "keet-live-send");
   assert.equal(options.name, "keet-live-send");
-  assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
+  assert.equal(options.roomId, "test-room-id-qvac");
   assert.equal(options.message, "hello from qvac");
   assert.equal(options.timeoutMs, 5000);
   assert.equal(options.lingerMs, 10000);
@@ -147,7 +147,7 @@ test("parseCliOptions configures Keet live watch command", () => {
   const options = parseCliOptions([
     "keet-live-watch",
     "--room-id",
-    "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so",
+    "test-room-id-qvac",
     "--poll-ms",
     "1000",
     "--once",
@@ -156,7 +156,7 @@ test("parseCliOptions configures Keet live watch command", () => {
 
   assert.equal(options.command, "keet-live-watch");
   assert.equal(options.name, "keet-live-watch");
-  assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
+  assert.equal(options.roomId, "test-room-id-qvac");
   assert.equal(options.pollMs, 1000);
   assert.equal(options.once, true);
   assert.equal(options.subscribe, true);
@@ -166,14 +166,14 @@ test("parseCliOptions configures Keet live subscribe probe command", () => {
   const options = parseCliOptions([
     "keet-live-subscribe-probe",
     "--room-id",
-    "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so",
+    "test-room-id-qvac",
     "--timeout-ms",
     "5000",
   ]);
 
   assert.equal(options.command, "keet-live-subscribe-probe");
   assert.equal(options.name, "keet-live-subscribe-probe");
-  assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
+  assert.equal(options.roomId, "test-room-id-qvac");
   assert.equal(options.timeoutMs, 5000);
 });
 
@@ -181,7 +181,7 @@ test("parseCliOptions configures Keet live agent command", () => {
   const options = parseCliOptions([
     "keet-live-agent",
     "--room-id",
-    "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so",
+    "test-room-id-qvac",
     "--poll-ms",
     "1000",
     "--base-url",
@@ -194,7 +194,7 @@ test("parseCliOptions configures Keet live agent command", () => {
 
   assert.equal(options.command, "keet-live-agent");
   assert.equal(options.name, "keet-live-agent");
-  assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
+  assert.equal(options.roomId, "test-room-id-qvac");
   assert.equal(options.pollMs, 1000);
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");

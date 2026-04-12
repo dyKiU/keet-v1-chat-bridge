@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { collectAnswer, shouldReply, thinkingText } from "../src/keet-live-agent.js";
+import { collectAnswer, modelThinkingText, shouldReply, thinkingText } from "../src/keet-live-agent.js";
 import { newestSeq, summarizeKeetChatMessages } from "../src/keet-live-messages.js";
 
 test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
@@ -33,7 +33,13 @@ test("shouldReply ignores qvac-prefixed assistant replies", () => {
   assert.equal(shouldReply({ seq: 1, text: "what model are you?" }), true);
   assert.equal(shouldReply({ seq: 2, text: "[qvac] qwen3-4b" }), false);
   assert.equal(shouldReply({ seq: 4, text: thinkingText() }), false);
+  assert.equal(shouldReply({ seq: 5, text: modelThinkingText("gemma4:26b") }), false);
   assert.equal(shouldReply({ seq: 3, text: "   " }), false);
+});
+
+test("modelThinkingText includes the configured model name", () => {
+  assert.equal(modelThinkingText("gemma4:26b"), "[gemma4:26b] is thinking...");
+  assert.equal(modelThinkingText("qwen3-4b"), "[qwen3-4b] is thinking...");
 });
 
 test("collectAnswer does not show thinking when QVAC fails before streaming", async () => {

@@ -10,7 +10,7 @@ export interface KeetLiveAgentOptions extends OpenAiClientOptions {
 }
 
 const ASSISTANT_PREFIX = "[qvac]";
-const THINKING_TEXT = `${ASSISTANT_PREFIX} is thinking...`;
+const THINKING_SUFFIX = "is thinking...";
 
 type ChatStreamer = typeof streamChatCompletion;
 
@@ -113,7 +113,11 @@ async function agentSubscription(
 
 export function shouldReply(message: KeetLiveChatMessage): boolean {
   const text = message.text.trim();
-  return text.length > 0 && !text.startsWith(ASSISTANT_PREFIX);
+  return text.length > 0 && !text.startsWith(ASSISTANT_PREFIX) && !isThinkingMessage(text);
+}
+
+function isThinkingMessage(text: string): boolean {
+  return /^\[[^\]]+\] is thinking\.\.\.$/.test(text);
 }
 
 async function replyToMessage(
@@ -122,16 +126,17 @@ async function replyToMessage(
   message: KeetLiveChatMessage,
   timeoutMs: number,
 ): Promise<void> {
+  const thinkingText = modelThinkingText(options.model);
   const answer = await collectAnswer(message.text, options, async () => {
     const result = await withTimeout(
-      api.core.addChatMessage(options.roomId, THINKING_TEXT, {}),
+      api.core.addChatMessage(options.roomId, thinkingText, {}),
       timeoutMs,
       "core.addChatMessage(thinking)",
     );
     console.log(JSON.stringify({
       event: "thinking",
       inReplyToSeq: message.seq,
-      text: THINKING_TEXT,
+      text: thinkingText,
       result: summarizeResult(result),
     }));
   }).catch((error) => {
@@ -192,7 +197,12 @@ export async function collectAnswer(
 }
 
 export function thinkingText(): string {
-  return THINKING_TEXT;
+  return modelThinkingText("qvac");
+}
+
+export function modelThinkingText(model: string): string {
+  const label = model.replace(/[\r\n[\]]/g, " ").trim() || "model";
+  return `[${label}] ${THINKING_SUFFIX}`;
 }
 
 function summarizeRoom(value: unknown): Record<string, unknown> {

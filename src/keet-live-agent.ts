@@ -184,8 +184,10 @@ export async function collectAnswer(
   };
 
   try {
-    for await (const chunk of stream({ type: "chat.request", id: `keet-${Date.now()}`, prompt, ts: Date.now() }, options)) {
-      scheduleThinking();
+    const requestOptions = onThinking
+      ? { ...options, onResponseAccepted: scheduleThinking }
+      : options;
+    for await (const chunk of stream({ type: "chat.request", id: `keet-${Date.now()}`, prompt, ts: Date.now() }, requestOptions)) {
       chunks.push(chunk);
     }
   } finally {

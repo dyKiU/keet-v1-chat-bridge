@@ -42,7 +42,7 @@ test("collectAnswer does not show thinking when QVAC fails before streaming", as
   await assert.rejects(
     collectAnswer("hello", testOpenAiOptions(), async () => {
       thinkingCount += 1;
-    }, async function* () {
+    }, async function* (_request, _options) {
       throw new Error("connect ECONNREFUSED");
       yield "";
     }),
@@ -57,7 +57,8 @@ test("collectAnswer skips thinking for quick responses", async () => {
 
   const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {
     thinkingCount += 1;
-  }, async function* () {
+  }, async function* (_request, options) {
+    options.onResponseAccepted?.();
     yield "quick";
   });
 
@@ -70,10 +71,10 @@ test("collectAnswer shows thinking only while waiting on a live QVAC response", 
 
   const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {
     thinkingCount += 1;
-  }, async function* () {
-    yield "slow ";
+  }, async function* (_request, options) {
+    options.onResponseAccepted?.();
     await new Promise((resolve) => setTimeout(resolve, 850));
-    yield "answer";
+    yield "slow answer";
   });
 
   assert.equal(answer, "slow answer");

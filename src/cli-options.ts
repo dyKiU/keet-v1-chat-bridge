@@ -10,7 +10,6 @@ export type CliCommand =
   | "keet-live-store-guard"
   | "keet-live-readonly-probe"
   | "keet-live-send"
-  | "keet-live-subscribe-probe"
   | "keet-live-watch"
   | "keet-live-agent"
   | "keet-readonly-probe";
@@ -34,7 +33,6 @@ export interface CliOptions {
   textOnly: boolean;
   stripThink: boolean;
   once: boolean;
-  subscribe: boolean;
   waitForResponse: boolean;
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
@@ -58,12 +56,11 @@ export function parseCliOptions(argv: string[]): CliOptions {
     rawCommand !== "keet-live-store-guard" &&
     rawCommand !== "keet-live-readonly-probe" &&
     rawCommand !== "keet-live-send" &&
-    rawCommand !== "keet-live-subscribe-probe" &&
     rawCommand !== "keet-live-watch" &&
     rawCommand !== "keet-live-agent" &&
     rawCommand !== "keet-readonly-probe"
   ) {
-    throw new Error(`Usage: keet-v1-chat-bridge <host|client|probe|post|keet-welcome|keet-rpc-probe|keet-live-store-guard|keet-live-readonly-probe|keet-live-send|keet-live-subscribe-probe|keet-live-watch|keet-live-agent|keet-readonly-probe> [options]\n${usage()}`);
+    throw new Error(`Usage: qvac-hyperswarm-bridge <host|client|probe|post|keet-welcome|keet-rpc-probe|keet-live-store-guard|keet-live-readonly-probe|keet-live-send|keet-live-watch|keet-live-agent|keet-readonly-probe> [options]\n${usage()}`);
   }
 
   const options: CliOptions = {
@@ -76,7 +73,6 @@ export function parseCliOptions(argv: string[]): CliOptions {
     textOnly: false,
     stripThink: false,
     once: false,
-    subscribe: false,
     waitForResponse: false,
   };
 
@@ -153,9 +149,6 @@ export function parseCliOptions(argv: string[]): CliOptions {
       case "--once":
         options.once = true;
         break;
-      case "--subscribe":
-        options.subscribe = true;
-        break;
       case "--wait-for-response":
         options.waitForResponse = true;
         break;
@@ -184,7 +177,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
   }
 
   if (
-    (options.command === "keet-live-send" || options.command === "keet-live-subscribe-probe" || options.command === "keet-live-watch" || options.command === "keet-live-agent") &&
+    (options.command === "keet-live-send" || options.command === "keet-live-watch" || options.command === "keet-live-agent") &&
     !options.roomId
   ) {
     throw new Error(`${options.command} mode requires --room-id <local-keet-room-id>`);
@@ -205,9 +198,8 @@ export function usage(): string {
     "  keet-live-store-guard",
     "  keet-live-readonly-probe [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "  keet-live-send --room-id <local-keet-room-id> [--message <text>] [--linger-ms <ms>] [--wait-for-response] [--timeout-ms <ms>]",
-    "  keet-live-subscribe-probe --room-id <local-keet-room-id> [--timeout-ms <ms>]",
-    "  keet-live-watch --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
-    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--strip-think]",
+    "  keet-live-watch --room-id <local-keet-room-id> [--poll-ms <ms>] [--once] [--timeout-ms <ms>]",
+    "  keet-live-agent --room-id <local-keet-room-id> [--poll-ms <ms>] [--base-url <url>] [--model <name>] [--strip-think]",
     "  keet-readonly-probe [--keet-dump <path>] [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "",
     "Defaults:",
@@ -236,8 +228,6 @@ function defaultName(command: CliCommand): string {
       return "keet-live-readonly-probe";
     case "keet-live-send":
       return "keet-live-send";
-    case "keet-live-subscribe-probe":
-      return "keet-live-subscribe-probe";
     case "keet-live-watch":
       return "keet-live-watch";
     case "keet-live-agent":

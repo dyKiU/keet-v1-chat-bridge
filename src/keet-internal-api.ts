@@ -3,7 +3,7 @@ import path from "node:path";
 
 export const DEFAULT_KEET_DUMP_PATH = "/tmp/keet-pear-dump";
 export const DEFAULT_WELCOME_MESSAGE =
-  "Warm welcome from the local Keet v1 chat bridge. The Mac-side bridge is online and ready to route private local LLM responses.";
+  "Warm welcome from the local QVAC/Keet integration. The Mac-side bridge is online and ready to route private local LLM responses.";
 
 export interface KeetInternalMethod {
   api: string;

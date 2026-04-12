@@ -6,7 +6,6 @@ export interface OpenAiClientOptions {
   apiKey?: string | undefined;
   systemPrompt?: string | undefined;
   stripThink?: boolean | undefined;
-  onResponseAccepted?: (() => void) | undefined;
 }
 
 interface ChatMessage {
@@ -134,8 +133,6 @@ export async function* streamChatCompletion(
   if (!response.ok) {
     throw new Error(`OpenAI-compatible server returned HTTP ${response.status}: ${await response.text()}`);
   }
-
-  options.onResponseAccepted?.();
 
   if (!response.body) {
     const text = extractChatCompletionText(await response.json());

@@ -1,8 +1,8 @@
-# Keet v1 Chat Bridge
+# QVAC Hyperswarm Bridge
 
-Bridge Keet rooms and Hyperswarm test clients to any OpenAI-compatible `/v1/chat/completions` server, including Ollama, QVAC, LM Studio, and llama.cpp.
+Local Hyperswarm bridge for sending chat-style requests to the QVAC OpenAI-compatible server at `http://127.0.0.1:11435/v1`.
 
-See [Keet/v1 Chat Live Bridge Notes](docs/keet-v1-chat-live-bridge.md) for the source-code map, failed experiments, working live-store path, auth model, and daemon runbook.
+See [Keet/QVAC Live Bridge Notes](docs/keet-qvac-live-bridge.md) for the source-code map, failed experiments, working live-store path, auth model, and daemon runbook.
 
 ## Local Echo Demo
 
@@ -22,9 +22,9 @@ npm run dev -- client --topic <topic>
 
 Type a prompt and press return. In echo mode the response should be `echo: <prompt>`.
 
-## OpenAI-Compatible /v1 Demo
+## QVAC Demo
 
-With an OpenAI-compatible server already running:
+With the QVAC server already running:
 
 ```sh
 npm run dev -- host --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think
@@ -45,17 +45,17 @@ The Pear terminal guide maps cleanly to a companion app for our own bridge proto
 ```sh
 cd pear-terminal
 npm install
-"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask .
+'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask .
 ```
 
 Copy the 64-character topic printed after `topic:` into a second Pear terminal. Use the actual topic value, without angle brackets:
 
 ```sh
 cd pear-terminal
-"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-b
+'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-b
 ```
 
-Or connect the Pear terminal client to the TypeScript chat host:
+Or connect the Pear terminal client to the TypeScript QVAC host:
 
 ```sh
 npm run dev -- host --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think
@@ -65,13 +65,13 @@ Copy the printed `topic:` value, then in another terminal:
 
 ```sh
 cd pear-terminal
-"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-v1-chat
+'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . PASTE_TOPIC_HERE --name pear-qvac
 ```
 
 Example shape:
 
 ```sh
-"$HOME/Library/Application Support/pear/bin/pear" run --dev --tmp-store --no-ask . dc5821a19d42fae5732c8905437d84a6104e83a3ed5ede056cb5d5d1dd1fd38b --name pear-v1-chat
+'/Users/pj/Library/Application Support/pear/bin/pear' run --dev --tmp-store --no-ask . dc5821a19d42fae5732c8905437d84a6104e83a3ed5ede056cb5d5d1dd1fd38b --name pear-qvac
 ```
 
 If you see `zsh: no such file or directory: topic`, it means the placeholder was copied literally as `<topic>`. In zsh, `<topic>` is parsed as input redirection from a file named `topic`.
@@ -79,7 +79,7 @@ If you see `zsh: no such file or directory: topic`, it means the placeholder was
 Inside the Pear terminal app:
 
 - `/say <text>` broadcasts a text frame.
-- `/ask <prompt>` sends a `chat.request`; the TypeScript host can answer it from the local OpenAI-compatible server.
+- `/ask <prompt>` sends a `chat.request`; the TypeScript host can answer it from the local OpenAI-compatible QVAC server.
 - `/peers` prints the current peer count.
 
 Observed working path:
@@ -106,47 +106,47 @@ This is useful for local scripts, test harnesses, or a future UI process that ca
 If a UI process can run local commands, the integration point is:
 
 ```sh
-cd $HOME/project/keet-v1-chat-bridge
+cd /Users/pj/project/qvac-hyperswarm-bridge
 npm run dev -- post --topic PASTE_TOPIC_HERE --ask 'hello from the UI process'
 ```
 
 The stock iPhone Keet app still cannot use this unless it speaks this bridge protocol or Keet exposes a public bot/room API.
 
-## Background Pear Bridge Demo
+## Background Pear QVAC Demo
 
 The full local demo can be started as background processes with PID and log state:
 
 ```sh
-npm run pear:bridge:start
+npm run pear:qvac:start
 ```
 
 This starts:
 
-- the TypeScript chat host with `--base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think`
+- the TypeScript QVAC host with `--base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think`
 - the Pear terminal companion using the host's printed topic
 
-Runtime state is written under `.run/pear-bridge-demo/`:
+Runtime state is written under `.run/pear-qvac-demo/`:
 
-- `.run/pear-bridge-demo/state.json`
-- `.run/pear-bridge-demo/host.log`
-- `.run/pear-bridge-demo/pear.log`
+- `.run/pear-qvac-demo/state.json`
+- `.run/pear-qvac-demo/host.log`
+- `.run/pear-qvac-demo/pear.log`
 
 Useful commands:
 
 ```sh
-npm run pear:bridge:status
-npm run pear:bridge:logs
-npm run pear:bridge:logs -- pear
-npm run pear:bridge:stop
+npm run pear:qvac:status
+npm run pear:qvac:logs
+npm run pear:qvac:logs -- pear
+npm run pear:qvac:stop
 ```
 
 Environment overrides:
 
 ```sh
-V1_CHAT_BASE_URL=http://127.0.0.1:11435/v1 V1_CHAT_MODEL=qwen3-4b PEAR_NAME=pear-v1-chat npm run pear:bridge:start
+QVAC_BASE_URL=http://127.0.0.1:11435/v1 QVAC_MODEL=qwen3-4b PEAR_NAME=pear-qvac npm run pear:qvac:start
 ```
 
-The Pear terminal app normally wants a TTY. The background script runs it through macOS `script` so it gets a pseudo-terminal while logs still go to `.run/pear-bridge-demo/pear.log`.
+The Pear terminal app normally wants a TTY. The background script runs it through macOS `script` so it gets a pseudo-terminal while logs still go to `.run/pear-qvac-demo/pear.log`.
 
 ## Current Keet Gap
 
@@ -162,7 +162,7 @@ If the phone joins that same discovery key, the probe prints a peer connection. 
 
 Observed with a real Keet chat room link:
 
-- `pear://keet/<room-link>` was decoded into three aligned z-base32 key candidates.
+- `pear://keet/nfo6...puma6o` was decoded into three aligned z-base32 key candidates.
 - Probe joined each candidate as raw key and Hypercore discovery key.
 - The stock Keet iPhone app did not connect to any candidate during the smoke test.
 
@@ -221,10 +221,10 @@ with this worker:
 /Applications/Keet.app/Contents/Resources/app/.webpack/main/workers/core/index.mjs
 ```
 
-On this machine the live Keet store was detected under the local account:
+On this machine the live Keet store was detected under the `pj` account:
 
 ```text
-$HOME/Library/Application Support/pear/app-storage/by-dkey/<detected-dkey>
+/Users/pj/Library/Application Support/pear/app-storage/by-dkey/197ea022b663edbedcf0b2a0fe44ebc99c21448cb46d375ec77d95de6e0a4c1a
 ```
 
 Before any future command opens that live store, run:
@@ -263,7 +263,7 @@ Observed after quitting Keet:
 With the guard green and an explicit local room id, the installed Keet core can also post a plain text message:
 
 ```sh
-npm run dev -- keet-live-send --room-id <local-keet-room-id> --message 'Warm welcome from the local Keet/v1 chat integration.' --timeout-ms 20000
+npm run dev -- keet-live-send --room-id <local-keet-room-id> --message 'Warm welcome from the local QVAC/Keet integration.' --timeout-ms 20000
 ```
 
 This command starts by running the live-store guard, opens the same bundled Keet core worker, verifies `core.getRoomInfo(roomId)`, calls `core.addChatMessage(roomId, text, {})`, then reads recent messages back with `core.getChatMessages(roomId, { reverse: true })`. It should only be used against an explicit test room id, with Keet closed.
@@ -271,12 +271,12 @@ This command starts by running the live-store guard, opens the same bundled Keet
 For propagation-sensitive sends, keep the core online after the local append:
 
 ```sh
-npm run dev -- keet-live-send --room-id <local-keet-room-id> --message 'Gated send test from the local Keet/v1 chat bridge. Please reply when this appears on the other device.' --linger-ms 60000 --wait-for-response --timeout-ms 20000
+npm run dev -- keet-live-send --room-id <local-keet-room-id> --message 'Gated send test from the local Keet/QVAC bridge. Please reply when this appears on the other device.' --linger-ms 60000 --wait-for-response --timeout-ms 20000
 ```
 
 There is no confirmed delivery-receipt RPC in the current private API surface, so `--wait-for-response` gates on the next later room message rather than a true read receipt. That is still useful for demos: it proves the sent message propagated far enough for another device/user to answer, and the local core synced the response back.
 
-Observed against the local test room:
+Observed against the local `qvac` test room:
 
 - green: `core.addChatMessage(roomId, text, {})` returned an oplog key and length.
 - green: the newest recent message was the welcome text from the local profile.
@@ -286,27 +286,27 @@ Observed against the local test room:
 For incoming messages from paired devices, keep the Keet app closed and run the read-only watcher:
 
 ```sh
-npm run dev -- keet-live-watch --room-id <local-keet-room-id> --subscribe
+npm run dev -- keet-live-watch --room-id <local-keet-room-id> --poll-ms 2000
 ```
 
-The watcher opens the installed Keet core, records the current highest chat sequence as a high-water mark, then subscribes with `core.subscribeChatMessages(roomId)`. The subscription emits full room message arrays, including an initial replay, so the watcher filters on later `seq` values and prints new messages as newline-delimited JSON events. If subscription behavior changes, fall back to polling with `--poll-ms 2000`. Use `--once` for a non-mutating startup smoke test:
+The watcher opens the installed Keet core, records the current highest chat sequence as a high-water mark, then polls `core.getChatMessages(roomId, { reverse: true })`. New messages are printed as newline-delimited JSON events. Use `--once` for a non-mutating startup smoke test:
 
 ```sh
 npm run dev -- keet-live-watch --room-id <local-keet-room-id> --once --timeout-ms 20000
 ```
 
-To let the local v1 chat server reply to new messages, run the agent:
+To let the local QVAC server reply to new messages, run the agent:
 
 ```sh
-npm run dev -- keet-live-agent --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think --subscribe
+npm run dev -- keet-live-agent --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think --poll-ms 2000
 ```
 
-The agent uses the same high-water mark, sends each new non-empty message to the OpenAI-compatible `/v1/chat/completions` endpoint, and posts replies back with a `[llm]` prefix. It ignores messages that already start with `[llm]` to avoid replying to itself. Polling mode remains available with `--poll-ms 2000`.
+The agent uses the same polling high-water mark, sends each new non-empty message to the OpenAI-compatible `/v1/chat/completions` endpoint, and posts replies back with a `[qvac]` prefix. It ignores messages that already start with `[qvac]` to avoid replying to itself.
 
 To run the agent in the background:
 
 ```sh
-npm run keet:agent:start -- --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --subscribe
+npm run keet:agent:start -- --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --poll-ms 2000
 npm run keet:agent:status
 npm run keet:agent:logs
 npm run keet:agent:stop

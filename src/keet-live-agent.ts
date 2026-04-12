@@ -6,14 +6,9 @@ export interface KeetLiveAgentOptions extends OpenAiClientOptions {
   roomId: string;
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
-  subscribe?: boolean | undefined;
 }
 
-const ASSISTANT_PREFIX = "[llm]";
-const LEGACY_ASSISTANT_PREFIX = "[qvac]";
-const THINKING_SUFFIX = "is thinking...";
-
-type ChatStreamer = typeof streamChatCompletion;
+const ASSISTANT_PREFIX = "[qvac]";
 
 export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<number> {
   const timeoutMs = options.timeoutMs ?? 30000;
@@ -36,15 +31,9 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
         mode: "agent",
         room: summarizeRoom(info),
         highSeq,
-        transport: options.subscribe ? "subscribe" : "poll",
-        pollMs: options.subscribe ? undefined : pollMs,
+        pollMs,
         model: options.model,
       }, null, 2));
-
-      if (options.subscribe) {
-        await agentSubscription(core.api, options, () => highSeq, (next) => { highSeq = next; }, abort.signal, timeoutMs);
-        return;
-      }
 
       while (!abort.signal.aborted) {
         await sleep(pollMs, abort.signal);
@@ -59,7 +48,19 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
           console.log(JSON.stringify({ event: "message", ...message }));
           if (!shouldReply(message)) continue;
 
-          await replyToMessage(core.api, options, message, timeoutMs);
+          const answer = await collectAnswer(message.text, options);
+          const text = `${ASSISTANT_PREFIX} ${answer}`;
+          const result = await withTimeout(
+            core.api.core.addChatMessage(options.roomId, text, {}),
+            timeoutMs,
+            "core.addChatMessage(reply)",
+          );
+          console.log(JSON.stringify({
+            event: "reply",
+            inReplyToSeq: message.seq,
+            text,
+            result: summarizeResult(result),
+          }));
         }
       }
     });
@@ -78,135 +79,17 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
   }
 }
 
-async function agentSubscription(
-  api: any,
-  options: KeetLiveAgentOptions,
-  getHighSeq: () => number,
-  setHighSeq: (seq: number) => void,
-  signal: AbortSignal,
-  timeoutMs: number,
-): Promise<void> {
-  const stream = api.core.subscribeChatMessages(options.roomId);
-  await new Promise<void>((resolve, reject) => {
-    const finish = () => {
-      stream.destroy();
-      resolve();
-    };
-    signal.addEventListener("abort", finish, { once: true });
-    stream.on("data", (value: unknown) => {
-      void (async () => {
-        const fresh = summarizeKeetChatMessages(value)
-          .filter((message) => message.seq > getHighSeq())
-          .sort((a, b) => a.seq - b.seq);
-        for (const message of fresh) {
-          setHighSeq(Math.max(getHighSeq(), message.seq));
-          console.log(JSON.stringify({ event: "message", ...message }));
-          if (!shouldReply(message)) continue;
-
-          await replyToMessage(api, options, message, timeoutMs);
-        }
-      })().catch(reject);
-    });
-    stream.once("error", reject);
-    stream.once("close", resolve);
-  });
-}
-
 export function shouldReply(message: KeetLiveChatMessage): boolean {
   const text = message.text.trim();
-  return text.length > 0 &&
-    !text.startsWith(ASSISTANT_PREFIX) &&
-    !text.startsWith(LEGACY_ASSISTANT_PREFIX) &&
-    !isThinkingMessage(text);
+  return text.length > 0 && !text.startsWith(ASSISTANT_PREFIX);
 }
 
-function isThinkingMessage(text: string): boolean {
-  return /^\[[^\]]+\] is thinking\.\.\.$/.test(text);
-}
-
-async function replyToMessage(
-  api: any,
-  options: KeetLiveAgentOptions,
-  message: KeetLiveChatMessage,
-  timeoutMs: number,
-): Promise<void> {
-  const thinkingText = modelThinkingText(options.model);
-  const answer = await collectAnswer(message.text, options, async () => {
-    const result = await withTimeout(
-      api.core.addChatMessage(options.roomId, thinkingText, {}),
-      timeoutMs,
-      "core.addChatMessage(thinking)",
-    );
-    console.log(JSON.stringify({
-      event: "thinking",
-      inReplyToSeq: message.seq,
-      text: thinkingText,
-      result: summarizeResult(result),
-    }));
-  }).catch((error) => {
-    console.log(JSON.stringify({
-      event: "reply_error",
-      inReplyToSeq: message.seq,
-      error: error instanceof Error ? error.message : String(error),
-    }));
-    return undefined;
-  });
-  if (answer === undefined) return;
-
-  const text = `${ASSISTANT_PREFIX} ${answer}`;
-  const result = await withTimeout(
-    api.core.addChatMessage(options.roomId, text, {}),
-    timeoutMs,
-    "core.addChatMessage(reply)",
-  );
-  console.log(JSON.stringify({
-    event: "reply",
-    inReplyToSeq: message.seq,
-    text,
-    result: summarizeResult(result),
-  }));
-}
-
-export async function collectAnswer(
-  prompt: string,
-  options: OpenAiClientOptions,
-  onThinking?: (() => Promise<void>) | undefined,
-  stream: ChatStreamer = streamChatCompletion,
-): Promise<string> {
+async function collectAnswer(prompt: string, options: OpenAiClientOptions): Promise<string> {
   const chunks: string[] = [];
-  let thinkingPromise: Promise<void> | undefined;
-
-  const scheduleThinking = () => {
-    if (!onThinking || thinkingPromise) return;
-    thinkingPromise = onThinking().catch((error) => {
-      console.log(JSON.stringify({
-        event: "thinking_error",
-        error: error instanceof Error ? error.message : String(error),
-      }));
-    });
-  };
-
-  try {
-    const requestOptions = onThinking
-      ? { ...options, onResponseAccepted: scheduleThinking }
-      : options;
-    for await (const chunk of stream({ type: "chat.request", id: `keet-${Date.now()}`, prompt, ts: Date.now() }, requestOptions)) {
-      chunks.push(chunk);
-    }
-  } finally {
-    await thinkingPromise;
+  for await (const chunk of streamChatCompletion({ type: "chat.request", id: `keet-${Date.now()}`, prompt, ts: Date.now() }, options)) {
+    chunks.push(chunk);
   }
-
   return chunks.join("").trim();
-}
-
-export function thinkingText(): string {
-  return modelThinkingText("llm");
-}
-
-export function modelThinkingText(model: string): string {
-  const label = model.replace(/[\r\n[\]]/g, " ").trim() || "model";
-  return `[${label}] ${THINKING_SUFFIX}`;
 }
 
 function summarizeRoom(value: unknown): Record<string, unknown> {

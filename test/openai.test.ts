@@ -33,10 +33,10 @@ test("parseOpenAiSseDeltas ignores non-content chunks", () => {
 
 test("extractChatCompletionText handles non-streaming response", () => {
   const response = {
-    choices: [{ message: { role: "assistant", content: "v1 chat server works" } }],
+    choices: [{ message: { role: "assistant", content: "qvac server works" } }],
   };
 
-  assert.equal(extractChatCompletionText(response), "v1 chat server works");
+  assert.equal(extractChatCompletionText(response), "qvac server works");
 });
 
 test("stripThinkBlocks removes empty or populated think sections", () => {

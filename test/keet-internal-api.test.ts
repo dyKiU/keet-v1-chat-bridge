@@ -77,7 +77,7 @@ test("buildKeetWelcomePlan reports internal methods and private-api blockers", a
 
   const plan = await buildKeetWelcomePlan({
     roomLink: "pear://keet/example-room",
-    message: "hello from llm",
+    message: "hello from qvac",
     dumpPath,
   });
 

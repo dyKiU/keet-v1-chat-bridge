@@ -8,7 +8,6 @@ import { runKeetLiveAgent } from "./keet-live-agent.js";
 import { runKeetLiveReadonlyProbe } from "./keet-live-readonly-probe.js";
 import { runKeetLiveSend } from "./keet-live-send.js";
 import { buildKeetLiveStorePlan, formatKeetLiveStorePlan } from "./keet-live-store.js";
-import { runKeetLiveSubscribeProbe } from "./keet-live-subscribe-probe.js";
 import { runKeetLiveWatch } from "./keet-live-watch.js";
 import { buildKeetRpcProbePlan, formatKeetRpcProbePlan } from "./keet-rpc-probe.js";
 import { deriveTopicCandidatesFromKeetInvite } from "./keet-link.js";
@@ -66,21 +65,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (options.command === "keet-live-subscribe-probe") {
-    process.exitCode = await runKeetLiveSubscribeProbe({
-      roomId: options.roomId ?? "",
-      timeoutMs: options.timeoutMs,
-    });
-    return;
-  }
-
   if (options.command === "keet-live-watch") {
     process.exitCode = await runKeetLiveWatch({
       roomId: options.roomId ?? "",
       timeoutMs: options.timeoutMs,
       pollMs: options.pollMs,
       once: options.once,
-      subscribe: options.subscribe,
     });
     return;
   }
@@ -95,7 +85,6 @@ async function main(): Promise<void> {
       apiKey: options.apiKey,
       systemPrompt: options.systemPrompt,
       stripThink: options.stripThink,
-      subscribe: options.subscribe,
     });
     return;
   }
@@ -138,7 +127,7 @@ async function main(): Promise<void> {
     console.log(`peer: ${peer.publicKey}`);
     console.log(options.echo
       ? "mode: echo"
-      : `mode: v1-chat ${options.baseUrl} model=${options.model}${options.stripThink ? " strip-think=true" : ""}`);
+      : `mode: qvac ${options.baseUrl} model=${options.model}${options.stripThink ? " strip-think=true" : ""}`);
 
     peer.on("connection", () => {
       console.log(`connected peers: ${peer.connectionCount}`);

@@ -1,19 +1,19 @@
 {
-  "name": "keet-v1-chat-bridge",
+  "name": "qvac-hyperswarm-bridge",
   "version": "1.0.0",
-  "description": "Bridge Keet rooms to OpenAI-compatible v1 chat completions",
+  "description": "Local Hyperswarm bridge for QVAC OpenAI-compatible chat completions",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
-    "keet-v1-chat-bridge": "dist/cli.js"
+    "qvac-hyperswarm-bridge": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli.ts",
-    "pear:bridge:start": "node scripts/pear-bridge-demo.mjs start",
-    "pear:bridge:stop": "node scripts/pear-bridge-demo.mjs stop",
-    "pear:bridge:status": "node scripts/pear-bridge-demo.mjs status",
-    "pear:bridge:logs": "node scripts/pear-bridge-demo.mjs logs",
+    "pear:qvac:start": "node scripts/pear-qvac-demo.mjs start",
+    "pear:qvac:stop": "node scripts/pear-qvac-demo.mjs stop",
+    "pear:qvac:status": "node scripts/pear-qvac-demo.mjs status",
+    "pear:qvac:logs": "node scripts/pear-qvac-demo.mjs logs",
     "keet:agent:start": "node scripts/keet-live-agent-daemon.mjs start",
     "keet:agent:stop": "node scripts/keet-live-agent-daemon.mjs stop",
     "keet:agent:status": "node scripts/keet-live-agent-daemon.mjs status",

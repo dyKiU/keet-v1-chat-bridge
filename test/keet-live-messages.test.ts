@@ -52,7 +52,7 @@ test("collectAnswer does not show thinking when QVAC fails before streaming", as
   assert.equal(thinkingCount, 0);
 });
 
-test("collectAnswer skips thinking for quick responses", async () => {
+test("collectAnswer shows thinking after QVAC accepts quick responses", async () => {
   let thinkingCount = 0;
 
   const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {
@@ -63,10 +63,10 @@ test("collectAnswer skips thinking for quick responses", async () => {
   });
 
   assert.equal(answer, "quick");
-  assert.equal(thinkingCount, 0);
+  assert.equal(thinkingCount, 1);
 });
 
-test("collectAnswer shows thinking only while waiting on a live QVAC response", async () => {
+test("collectAnswer shows thinking while waiting on a live QVAC response", async () => {
   let thinkingCount = 0;
 
   const answer = await collectAnswer("hello", testOpenAiOptions(), async () => {

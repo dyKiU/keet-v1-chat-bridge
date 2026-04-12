@@ -10,8 +10,7 @@ export interface KeetLiveAgentOptions extends OpenAiClientOptions {
 }
 
 const ASSISTANT_PREFIX = "[qvac]";
-const THINKING_TEXT = `${ASSISTANT_PREFIX} is typing...`;
-const THINKING_INDICATOR_DELAY_MS = 750;
+const THINKING_TEXT = `${ASSISTANT_PREFIX} is thinking...`;
 
 type ChatStreamer = typeof streamChatCompletion;
 
@@ -166,21 +165,16 @@ export async function collectAnswer(
   stream: ChatStreamer = streamChatCompletion,
 ): Promise<string> {
   const chunks: string[] = [];
-  let done = false;
-  let thinkingTimer: ReturnType<typeof setTimeout> | undefined;
   let thinkingPromise: Promise<void> | undefined;
 
   const scheduleThinking = () => {
-    if (!onThinking || thinkingTimer || thinkingPromise) return;
-    thinkingTimer = setTimeout(() => {
-      if (done) return;
-      thinkingPromise = onThinking().catch((error) => {
-        console.log(JSON.stringify({
-          event: "thinking_error",
-          error: error instanceof Error ? error.message : String(error),
-        }));
-      });
-    }, THINKING_INDICATOR_DELAY_MS);
+    if (!onThinking || thinkingPromise) return;
+    thinkingPromise = onThinking().catch((error) => {
+      console.log(JSON.stringify({
+        event: "thinking_error",
+        error: error instanceof Error ? error.message : String(error),
+      }));
+    });
   };
 
   try {
@@ -191,8 +185,6 @@ export async function collectAnswer(
       chunks.push(chunk);
     }
   } finally {
-    done = true;
-    if (thinkingTimer) clearTimeout(thinkingTimer);
     await thinkingPromise;
   }
 

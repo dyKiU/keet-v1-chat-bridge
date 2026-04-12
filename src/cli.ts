@@ -8,6 +8,7 @@ import { runKeetLiveAgent } from "./keet-live-agent.js";
 import { runKeetLiveReadonlyProbe } from "./keet-live-readonly-probe.js";
 import { runKeetLiveSend } from "./keet-live-send.js";
 import { buildKeetLiveStorePlan, formatKeetLiveStorePlan } from "./keet-live-store.js";
+import { runKeetLiveSubscribeProbe } from "./keet-live-subscribe-probe.js";
 import { runKeetLiveWatch } from "./keet-live-watch.js";
 import { buildKeetRpcProbePlan, formatKeetRpcProbePlan } from "./keet-rpc-probe.js";
 import { deriveTopicCandidatesFromKeetInvite } from "./keet-link.js";
@@ -61,6 +62,14 @@ async function main(): Promise<void> {
       timeoutMs: options.timeoutMs,
       lingerMs: options.lingerMs,
       waitForResponse: options.waitForResponse,
+    });
+    return;
+  }
+
+  if (options.command === "keet-live-subscribe-probe") {
+    process.exitCode = await runKeetLiveSubscribeProbe({
+      roomId: options.roomId ?? "",
+      timeoutMs: options.timeoutMs,
     });
     return;
   }

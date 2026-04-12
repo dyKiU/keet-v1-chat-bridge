@@ -102,6 +102,12 @@ npm run dev -- keet-live-readonly-probe --timeout-ms 20000
 npm run dev -- keet-live-watch --room-id <local-keet-room-id> --poll-ms 2000
 ```
 
+- `core.subscribeChatMessages(roomId)` is present and callable, but the first live probe showed that it immediately replays a full chat message array. In a 60 second test it did not emit a later update after the initial replay, so the agent keeps the polling watcher as the reliable path for now. The probe command is:
+
+```sh
+npm run dev -- keet-live-subscribe-probe --room-id <local-keet-room-id> --timeout-ms 60000
+```
+
 - Sending works when the worker is kept online long enough:
 
 ```sh

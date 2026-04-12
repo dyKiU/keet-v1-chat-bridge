@@ -160,6 +160,21 @@ test("parseCliOptions configures Keet live watch command", () => {
   assert.equal(options.once, true);
 });
 
+test("parseCliOptions configures Keet live subscribe probe command", () => {
+  const options = parseCliOptions([
+    "keet-live-subscribe-probe",
+    "--room-id",
+    "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so",
+    "--timeout-ms",
+    "5000",
+  ]);
+
+  assert.equal(options.command, "keet-live-subscribe-probe");
+  assert.equal(options.name, "keet-live-subscribe-probe");
+  assert.equal(options.roomId, "nnkdik6ozk6u3mhu5pixtyuppzks3do1qsknxx5t1fteyyu396so");
+  assert.equal(options.timeoutMs, 5000);
+});
+
 test("parseCliOptions configures Keet live agent command", () => {
   const options = parseCliOptions([
     "keet-live-agent",
@@ -189,6 +204,7 @@ test("parseCliOptions requires a Keet room for welcome command", () => {
 
 test("parseCliOptions requires a Keet room id for live commands", () => {
   assert.throws(() => parseCliOptions(["keet-live-send"]), /requires --room-id/);
+  assert.throws(() => parseCliOptions(["keet-live-subscribe-probe"]), /requires --room-id/);
   assert.throws(() => parseCliOptions(["keet-live-watch"]), /requires --room-id/);
   assert.throws(() => parseCliOptions(["keet-live-agent"]), /requires --room-id/);
 });

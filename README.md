@@ -38,6 +38,34 @@ npm run dev -- client --topic <topic>
 
 Replace `<topic>` with the 64-character hex topic printed by the host. Do not type the angle brackets in zsh.
 
+## Hermes OpenAI-Compatible API
+
+Hermes already exposes an OpenAI-compatible API server, so the bridge can point at Hermes directly instead of Ollama/QVAC:
+
+```sh
+npm run dev -- host --base-url http://127.0.0.1:8642/v1 --model hermes-agent --strip-think
+```
+
+If you want Hermes session continuity across turns, pass a stable session id. Hermes uses the `X-Hermes-Session-Id` header for that:
+
+```sh
+npm run dev -- host \
+  --base-url http://127.0.0.1:8642/v1 \
+  --model hermes-agent \
+  --session-id keet-room-demo \
+  --api-key "$API_SERVER_KEY" \
+  --strip-think
+```
+
+You can also set defaults through the environment before starting the bridge:
+
+```sh
+V1_CHAT_BASE_URL=http://127.0.0.1:8642/v1 \
+V1_CHAT_MODEL=hermes-agent \
+V1_CHAT_SESSION_ID=keet-room-demo \
+npm run dev -- host --strip-think
+```
+
 ## Pear Terminal Companion
 
 The Pear terminal guide maps cleanly to a companion app for our own bridge protocol:

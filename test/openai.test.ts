@@ -4,6 +4,7 @@ import {
   createThinkFilter,
   extractChatCompletionText,
   parseOpenAiSseDeltas,
+  streamChatCompletion,
   stripThinkBlocks,
 } from "../src/openai.js";
 
@@ -57,4 +58,43 @@ test("createThinkFilter removes think blocks across streaming boundaries", () =>
   ].join("");
 
   assert.equal(output.trim(), "bridge works");
+});
+
+test("streamChatCompletion sends Hermes session header when configured", async () => {
+  const originalFetch = globalThis.fetch;
+  let seenHeaders: Headers | undefined;
+
+  globalThis.fetch = async (_input, init) => {
+    seenHeaders = new Headers(init?.headers as HeadersInit | undefined);
+    return {
+      ok: true,
+      status: 200,
+      body: null,
+      json: async () => ({
+        choices: [{ message: { role: "assistant", content: "ok" } }],
+      }),
+      text: async () => "",
+    } as Response;
+  };
+
+  try {
+    const chunks: string[] = [];
+    for await (const chunk of streamChatCompletion({
+      type: "chat.request",
+      id: "req-1",
+      prompt: "hello",
+      ts: Date.now(),
+    }, {
+      baseUrl: "http://127.0.0.1:8642/v1",
+      model: "hermes-agent",
+      sessionId: "keet-room-123",
+    })) {
+      chunks.push(chunk);
+    }
+
+    assert.equal(chunks.join(""), "ok");
+    assert.equal(seenHeaders?.get("X-Hermes-Session-Id"), "keet-room-123");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

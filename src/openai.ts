@@ -4,6 +4,7 @@ export interface OpenAiClientOptions {
   baseUrl: string;
   model: string;
   apiKey?: string | undefined;
+  sessionId?: string | undefined;
   systemPrompt?: string | undefined;
   stripThink?: boolean | undefined;
   onResponseAccepted?: (() => void) | undefined;
@@ -120,6 +121,7 @@ export async function* streamChatCompletion(
   const url = new URL("chat/completions", ensureTrailingSlash(options.baseUrl));
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (options.apiKey) headers.Authorization = `Bearer ${options.apiKey}`;
+  if (options.sessionId) headers["X-Hermes-Session-Id"] = options.sessionId;
 
   const response = await fetch(url, {
     method: "POST",

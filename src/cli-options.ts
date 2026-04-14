@@ -29,6 +29,7 @@ export interface CliOptions {
   baseUrl: string;
   model: string;
   apiKey?: string | undefined;
+  sessionId?: string | undefined;
   systemPrompt?: string | undefined;
   echo: boolean;
   textOnly: boolean;
@@ -41,10 +42,13 @@ export interface CliOptions {
   lingerMs?: number | undefined;
 }
 
-const defaults = {
-  baseUrl: "http://127.0.0.1:11435/v1",
-  model: "qwen3-4b",
-};
+function getDefaults() {
+  return {
+    baseUrl: process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? "http://127.0.0.1:11435/v1",
+    model: process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL ?? "qwen3-4b",
+    sessionId: process.env.V1_CHAT_SESSION_ID,
+  };
+}
 
 export function parseCliOptions(argv: string[]): CliOptions {
   const [rawCommand, ...rest] = argv;
@@ -66,12 +70,14 @@ export function parseCliOptions(argv: string[]): CliOptions {
     throw new Error(`Usage: qvac-hyperswarm-bridge <host|client|probe|post|keet-welcome|keet-rpc-probe|keet-live-store-guard|keet-live-readonly-probe|keet-live-send|keet-live-subscribe-probe|keet-live-watch|keet-live-agent|keet-readonly-probe> [options]\n${usage()}`);
   }
 
+  const defaults = getDefaults();
   const options: CliOptions = {
     command: rawCommand,
     name: defaultName(rawCommand),
     message: DEFAULT_WELCOME_MESSAGE,
     baseUrl: defaults.baseUrl,
     model: defaults.model,
+    sessionId: defaults.sessionId,
     echo: false,
     textOnly: false,
     stripThink: false,
@@ -138,6 +144,9 @@ export function parseCliOptions(argv: string[]): CliOptions {
       case "--api-key":
         options.apiKey = readValue(rest, ++index, arg);
         break;
+      case "--session-id":
+        options.sessionId = readValue(rest, ++index, arg);
+        break;
       case "--system":
         options.systemPrompt = readValue(rest, ++index, arg);
         break;
@@ -194,9 +203,10 @@ export function parseCliOptions(argv: string[]): CliOptions {
 }
 
 export function usage(): string {
+  const defaults = getDefaults();
   return [
     "Commands:",
-    "  host [--topic <hex>] [--echo] [--strip-think] [--base-url <url>] [--model <name>]",
+    "  host [--topic <hex>] [--echo] [--strip-think] [--base-url <url>] [--model <name>] [--session-id <id>]",
     "  client --topic <hex> [--text] [--model <name>]",
     "  probe (--topic <hex> | --keet-invite <pear://keet/...>)",
     "  post --topic <hex> (--say <text> | --ask <prompt>) [--model <name>]",
@@ -207,12 +217,13 @@ export function usage(): string {
     "  keet-live-send --room-id <local-keet-room-id> [--message <text>] [--linger-ms <ms>] [--wait-for-response] [--timeout-ms <ms>]",
     "  keet-live-subscribe-probe --room-id <local-keet-room-id> [--timeout-ms <ms>]",
     "  keet-live-watch --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
-    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--strip-think]",
+    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--session-id <id>] [--strip-think]",
     "  keet-readonly-probe [--keet-dump <path>] [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "",
     "Defaults:",
     `  --base-url ${defaults.baseUrl}`,
     `  --model ${defaults.model}`,
+    `  --session-id ${defaults.sessionId ?? "<unset>"}`,
   ].join("\n");
 }
 

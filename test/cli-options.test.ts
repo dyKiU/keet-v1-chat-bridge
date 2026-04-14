@@ -11,6 +11,30 @@ test("parseCliOptions configures host defaults", () => {
   assert.equal(options.stripThink, true);
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");
+  assert.equal(options.sessionId, undefined);
+});
+
+test("parseCliOptions reads v1 chat defaults from env", () => {
+  const previousBaseUrl = process.env.V1_CHAT_BASE_URL;
+  const previousModel = process.env.V1_CHAT_MODEL;
+  const previousSessionId = process.env.V1_CHAT_SESSION_ID;
+  process.env.V1_CHAT_BASE_URL = "http://127.0.0.1:8642/v1";
+  process.env.V1_CHAT_MODEL = "hermes-agent";
+  process.env.V1_CHAT_SESSION_ID = "room-42";
+
+  try {
+    const options = parseCliOptions(["host"]);
+    assert.equal(options.baseUrl, "http://127.0.0.1:8642/v1");
+    assert.equal(options.model, "hermes-agent");
+    assert.equal(options.sessionId, "room-42");
+  } finally {
+    if (previousBaseUrl === undefined) delete process.env.V1_CHAT_BASE_URL;
+    else process.env.V1_CHAT_BASE_URL = previousBaseUrl;
+    if (previousModel === undefined) delete process.env.V1_CHAT_MODEL;
+    else process.env.V1_CHAT_MODEL = previousModel;
+    if (previousSessionId === undefined) delete process.env.V1_CHAT_SESSION_ID;
+    else process.env.V1_CHAT_SESSION_ID = previousSessionId;
+  }
 });
 
 test("parseCliOptions requires a client topic", () => {
@@ -188,6 +212,8 @@ test("parseCliOptions configures Keet live agent command", () => {
     "http://127.0.0.1:11435/v1",
     "--model",
     "qwen3-4b",
+    "--session-id",
+    "room-test-123",
     "--strip-think",
     "--subscribe",
   ]);
@@ -198,6 +224,7 @@ test("parseCliOptions configures Keet live agent command", () => {
   assert.equal(options.pollMs, 1000);
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");
+  assert.equal(options.sessionId, "room-test-123");
   assert.equal(options.stripThink, true);
   assert.equal(options.subscribe, true);
 });

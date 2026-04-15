@@ -53,8 +53,8 @@ QVAC:
 
 ## Docs
 
-- [Keet Bridge Operations](docs/keet-ops.md): detailed commands, probes, local demos, and historical notes.
-- [Keet Example](docs/keet-example.md): source-code map, safety model, private Keet API caveats, daemon runbook, and backend busy/error notes.
+- [Keet Bridge Operations](docs/ops.md): detailed commands, probes, local demos, and historical notes.
+- [Keet Example](docs/example.md): source-code map, safety model, private Keet API caveats, daemon runbook, and backend busy/error notes.
 
 ## Useful Scripts
 

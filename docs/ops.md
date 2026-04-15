@@ -51,7 +51,6 @@ If you want Hermes session continuity across turns, pass a stable session id. He
 ```sh
 npm run dev -- host \
   --base-url http://127.0.0.1:8642/v1 \
-  --model hermes-agent \
   --session-id keet-room-demo \
   --api-key "$API_SERVER_KEY" \
   --strip-think
@@ -61,10 +60,11 @@ You can also set defaults through the environment before starting the bridge:
 
 ```sh
 V1_CHAT_BASE_URL=http://127.0.0.1:8642/v1 \
-V1_CHAT_MODEL=hermes-agent \
 V1_CHAT_SESSION_ID=keet-room-demo \
 npm run dev -- host --strip-think
 ```
+
+With a Hermes base URL on `:8642`, omitting `--model` or `V1_CHAT_MODEL` defaults to `hermes-agent`.
 
 ## Pear Terminal Companion
 

@@ -14,7 +14,6 @@ Start the background agent:
 npm run keet:agent:start -- \
   --room-id <local-keet-room-id> \
   --base-url http://127.0.0.1:8642/v1 \
-  --model hermes-agent \
   --thinking-model hermes-agent/qwen3-4b
 ```
 
@@ -41,7 +40,7 @@ npm run keet:agent:stop
 Hermes:
 
 ```sh
---base-url http://127.0.0.1:8642/v1 --model hermes-agent
+--base-url http://127.0.0.1:8642/v1
 ```
 
 QVAC:
@@ -49,6 +48,8 @@ QVAC:
 ```sh
 --base-url http://127.0.0.1:11435/v1 --model qwen3-4b
 ```
+
+When `--model` is omitted, a Hermes base URL on `:8642` defaults to `hermes-agent`; other backends default to `qwen3-4b`.
 
 ## Docs
 

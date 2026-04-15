@@ -10,6 +10,9 @@ const rootDir = path.resolve(import.meta.dirname, '..')
 const stateDir = path.join(rootDir, '.run', 'keet-live-agent')
 const stateFile = path.join(stateDir, 'state.json')
 const agentLog = path.join(stateDir, 'agent.log')
+const defaultQvacBaseUrl = 'http://127.0.0.1:11435/v1'
+const defaultQvacModel = 'qwen3-4b'
+const defaultHermesModel = 'hermes-agent'
 
 const command = process.argv[2] ?? 'help'
 
@@ -51,6 +54,8 @@ async function start (args) {
   await rm(agentLog, { force: true })
 
   const logFd = openSync(agentLog, 'a')
+  const baseUrl = args.baseUrl ?? process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? defaultQvacBaseUrl
+  const model = args.model ?? process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL ?? defaultModelForBaseUrl(baseUrl)
   const agentArgs = [
     'run',
     'dev',
@@ -59,9 +64,9 @@ async function start (args) {
     '--room-id',
     roomId,
     '--base-url',
-    args.baseUrl ?? process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? 'http://127.0.0.1:11435/v1',
+    baseUrl,
     '--model',
-    args.model ?? process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL ?? 'qwen3-4b'
+    model
   ]
 
   if (args.thinkingModel ?? process.env.V1_CHAT_THINKING_MODEL) {
@@ -225,6 +230,16 @@ function envNumber (value) {
   return parsed
 }
 
+function defaultModelForBaseUrl (baseUrl) {
+  try {
+    const url = new URL(baseUrl)
+    if ((url.hostname === '127.0.0.1' || url.hostname === 'localhost') && url.port === '8642') return defaultHermesModel
+  } catch {
+    if (String(baseUrl).includes(':8642')) return defaultHermesModel
+  }
+  return defaultQvacModel
+}
+
 async function readState () {
   if (!existsSync(stateFile)) throw new Error(`No daemon state found at ${stateFile}`)
   return JSON.parse(await readFile(stateFile, 'utf8'))
@@ -264,7 +279,7 @@ function usage () {
     'Start options:',
     '  --room-id <id>       local Keet room id; alternatively KEET_ROOM_ID or QVAC_KEET_ROOM_ID',
     '  --base-url <url>     default V1_CHAT_BASE_URL, QVAC_BASE_URL, or http://127.0.0.1:11435/v1',
-    '  --model <name>       default V1_CHAT_MODEL, QVAC_MODEL, or qwen3-4b',
+    '  --model <name>       default V1_CHAT_MODEL, QVAC_MODEL, hermes-agent for :8642, otherwise qwen3-4b',
     '  --thinking-model <label>  label for thinking marker; alternatively V1_CHAT_THINKING_MODEL',
     '  --subscribe          use core.subscribeChatMessages; this is the default',
     '  --no-subscribe       use polling fallback instead of subscribe',

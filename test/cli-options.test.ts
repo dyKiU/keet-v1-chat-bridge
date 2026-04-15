@@ -37,6 +37,38 @@ test("parseCliOptions reads v1 chat defaults from env", () => {
   }
 });
 
+test("parseCliOptions defaults to Hermes model for Hermes base URL", () => {
+  const previousBaseUrl = process.env.V1_CHAT_BASE_URL;
+  const previousQvacBaseUrl = process.env.QVAC_BASE_URL;
+  const previousModel = process.env.V1_CHAT_MODEL;
+  const previousQvacModel = process.env.QVAC_MODEL;
+  delete process.env.V1_CHAT_BASE_URL;
+  delete process.env.QVAC_BASE_URL;
+  delete process.env.V1_CHAT_MODEL;
+  delete process.env.QVAC_MODEL;
+
+  try {
+    const options = parseCliOptions([
+      "keet-live-agent",
+      "--room-id",
+      "test-room-id-qvac",
+      "--base-url",
+      "http://127.0.0.1:8642/v1",
+    ]);
+    assert.equal(options.baseUrl, "http://127.0.0.1:8642/v1");
+    assert.equal(options.model, "hermes-agent");
+  } finally {
+    if (previousBaseUrl === undefined) delete process.env.V1_CHAT_BASE_URL;
+    else process.env.V1_CHAT_BASE_URL = previousBaseUrl;
+    if (previousQvacBaseUrl === undefined) delete process.env.QVAC_BASE_URL;
+    else process.env.QVAC_BASE_URL = previousQvacBaseUrl;
+    if (previousModel === undefined) delete process.env.V1_CHAT_MODEL;
+    else process.env.V1_CHAT_MODEL = previousModel;
+    if (previousQvacModel === undefined) delete process.env.QVAC_MODEL;
+    else process.env.QVAC_MODEL = previousQvacModel;
+  }
+});
+
 test("parseCliOptions requires a client topic", () => {
   assert.throws(() => parseCliOptions(["client"]), /requires --topic/);
 });

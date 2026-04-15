@@ -1,5 +1,9 @@
 import { DEFAULT_WELCOME_MESSAGE } from "./keet-internal-api.js";
 
+const DEFAULT_QVAC_BASE_URL = "http://127.0.0.1:11435/v1";
+const DEFAULT_QVAC_MODEL = "qwen3-4b";
+const DEFAULT_HERMES_MODEL = "hermes-agent";
+
 export type CliCommand =
   | "host"
   | "client"
@@ -44,9 +48,12 @@ export interface CliOptions {
 }
 
 function getDefaults() {
+  const baseUrl = process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? DEFAULT_QVAC_BASE_URL;
+  const modelFromEnv = process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL;
   return {
-    baseUrl: process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? "http://127.0.0.1:11435/v1",
-    model: process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL ?? "qwen3-4b",
+    baseUrl,
+    model: modelFromEnv ?? defaultModelForBaseUrl(baseUrl),
+    modelFromEnv: modelFromEnv !== undefined,
     sessionId: process.env.V1_CHAT_SESSION_ID,
   };
 }
@@ -73,6 +80,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
 
   const defaults = getDefaults();
   const defaultSubscribe = rawCommand === "keet-live-agent" || rawCommand === "keet-live-watch";
+  let modelProvided = defaults.modelFromEnv;
   const options: CliOptions = {
     command: rawCommand,
     name: defaultName(rawCommand),
@@ -140,9 +148,11 @@ export function parseCliOptions(argv: string[]): CliOptions {
         break;
       case "--base-url":
         options.baseUrl = readValue(rest, ++index, arg);
+        if (!modelProvided) options.model = defaultModelForBaseUrl(options.baseUrl);
         break;
       case "--model":
         options.model = readValue(rest, ++index, arg);
+        modelProvided = true;
         break;
       case "--thinking-model":
         options.thinkingModel = readValue(rest, ++index, arg);
@@ -234,6 +244,17 @@ export function usage(): string {
     `  --model ${defaults.model}`,
     `  --session-id ${defaults.sessionId ?? "<unset>"}`,
   ].join("\n");
+}
+
+function defaultModelForBaseUrl(baseUrl: string): string {
+  try {
+    const url = new URL(baseUrl);
+    if (url.hostname === "127.0.0.1" && url.port === "8642") return DEFAULT_HERMES_MODEL;
+    if (url.hostname === "localhost" && url.port === "8642") return DEFAULT_HERMES_MODEL;
+  } catch {
+    if (baseUrl.includes(":8642")) return DEFAULT_HERMES_MODEL;
+  }
+  return DEFAULT_QVAC_MODEL;
 }
 
 function defaultName(command: CliCommand): string {

@@ -72,6 +72,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
   }
 
   const defaults = getDefaults();
+  const defaultSubscribe = rawCommand === "keet-live-agent" || rawCommand === "keet-live-watch";
   const options: CliOptions = {
     command: rawCommand,
     name: defaultName(rawCommand),
@@ -83,7 +84,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
     textOnly: false,
     stripThink: false,
     once: false,
-    subscribe: false,
+    subscribe: defaultSubscribe,
     waitForResponse: false,
   };
 
@@ -126,6 +127,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
         if (!Number.isFinite(options.pollMs) || options.pollMs <= 0) {
           throw new Error("--poll-ms requires a positive number");
         }
+        options.subscribe = false;
         break;
       case "--linger-ms":
         options.lingerMs = Number(readValue(rest, ++index, arg));
@@ -168,6 +170,9 @@ export function parseCliOptions(argv: string[]): CliOptions {
         break;
       case "--subscribe":
         options.subscribe = true;
+        break;
+      case "--no-subscribe":
+        options.subscribe = false;
         break;
       case "--wait-for-response":
         options.waitForResponse = true;
@@ -220,8 +225,8 @@ export function usage(): string {
     "  keet-live-readonly-probe [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "  keet-live-send --room-id <local-keet-room-id> [--message <text>] [--linger-ms <ms>] [--wait-for-response] [--timeout-ms <ms>]",
     "  keet-live-subscribe-probe --room-id <local-keet-room-id> [--timeout-ms <ms>]",
-    "  keet-live-watch --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
-    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--thinking-model <label>] [--session-id <id>] [--strip-think]",
+    "  keet-live-watch --room-id <local-keet-room-id> [--no-subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
+    "  keet-live-agent --room-id <local-keet-room-id> [--no-subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--thinking-model <label>] [--session-id <id>] [--strip-think]",
     "  keet-readonly-probe [--keet-dump <path>] [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "",
     "Defaults:",

@@ -68,10 +68,13 @@ async function start (args) {
     agentArgs.push('--thinking-model', args.thinkingModel ?? process.env.V1_CHAT_THINKING_MODEL)
   }
 
-  if (args.subscribe ?? (process.env.KEET_SUBSCRIBE ?? process.env.QVAC_KEET_SUBSCRIBE) === 'true') {
+  const pollMs = args.pollMs ?? envNumber(process.env.KEET_POLL_MS ?? process.env.QVAC_KEET_POLL_MS)
+  const subscribe = args.subscribe ?? envBoolean(process.env.KEET_SUBSCRIBE ?? process.env.QVAC_KEET_SUBSCRIBE) ?? pollMs === undefined
+
+  if (subscribe) {
     agentArgs.push('--subscribe')
   } else {
-    agentArgs.push('--poll-ms', String(args.pollMs ?? process.env.KEET_POLL_MS ?? process.env.QVAC_KEET_POLL_MS ?? 2000))
+    agentArgs.push('--poll-ms', String(pollMs ?? 2000))
   }
 
   if (args.stripThink ?? (process.env.V1_CHAT_STRIP_THINK ?? process.env.QVAC_STRIP_THINK) !== 'false') {
@@ -183,9 +186,13 @@ function parseArgs (argv) {
       case '--poll-ms':
         args.pollMs = Number(readValue(argv, ++index, arg))
         if (!Number.isFinite(args.pollMs) || args.pollMs <= 0) throw new Error('--poll-ms requires a positive number')
+        args.subscribe = false
         break
       case '--subscribe':
         args.subscribe = true
+        break
+      case '--no-subscribe':
+        args.subscribe = false
         break
       case '--system':
         args.system = readValue(argv, ++index, arg)
@@ -204,6 +211,18 @@ function readValue (argv, index, flag) {
   const value = argv[index]
   if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`)
   return value
+}
+
+function envBoolean (value) {
+  if (value === undefined) return undefined
+  return value === 'true'
+}
+
+function envNumber (value) {
+  if (value === undefined) return undefined
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed <= 0) throw new Error('poll interval environment variable must be a positive number')
+  return parsed
 }
 
 async function readState () {
@@ -247,8 +266,9 @@ function usage () {
     '  --base-url <url>     default V1_CHAT_BASE_URL, QVAC_BASE_URL, or http://127.0.0.1:11435/v1',
     '  --model <name>       default V1_CHAT_MODEL, QVAC_MODEL, or qwen3-4b',
     '  --thinking-model <label>  label for thinking marker; alternatively V1_CHAT_THINKING_MODEL',
-    '  --subscribe          use core.subscribeChatMessages; alternatively KEET_SUBSCRIBE=true or QVAC_KEET_SUBSCRIBE=true',
-    '  --poll-ms <ms>       polling fallback; default KEET_POLL_MS, QVAC_KEET_POLL_MS, or 2000',
+    '  --subscribe          use core.subscribeChatMessages; this is the default',
+    '  --no-subscribe       use polling fallback instead of subscribe',
+    '  --poll-ms <ms>       polling fallback; also selectable with KEET_POLL_MS or QVAC_KEET_POLL_MS',
     '  --system <text>      optional system prompt; alternatively V1_CHAT_SYSTEM_PROMPT or QVAC_SYSTEM_PROMPT',
     '  --no-strip-think     do not pass --strip-think to the agent',
     '',

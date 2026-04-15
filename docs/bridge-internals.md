@@ -99,10 +99,10 @@ npm run dev -- keet-live-readonly-probe --timeout-ms 20000
 - Incoming message watch works:
 
 ```sh
-npm run dev -- keet-live-watch --room-id <local-keet-room-id> --subscribe
+npm run dev -- keet-live-watch --room-id <local-keet-room-id>
 ```
 
-- `core.subscribeChatMessages(roomId)` is present and callable. It immediately replays a full chat message array, then later updates arrive as full arrays too, not single-message deltas. The watcher and agent use a startup high-water mark and filter on later `seq` values. Polling with `--poll-ms 2000` remains a fallback. The probe command is:
+- `core.subscribeChatMessages(roomId)` is present and callable. It immediately replays a full chat message array, then later updates arrive as full arrays too, not single-message deltas. The watcher and agent use subscription mode by default, keep a startup high-water mark, and filter on later `seq` values. Polling with `--poll-ms 2000` or `--no-subscribe` remains a fallback. The probe command is:
 
 ```sh
 npm run dev -- keet-live-subscribe-probe --room-id <local-keet-room-id> --timeout-ms 60000
@@ -132,8 +132,7 @@ npm run dev -- keet-live-agent \
   --room-id <local-keet-room-id> \
   --base-url http://127.0.0.1:11435/v1 \
   --model qwen3-4b \
-  --strip-think \
-  --subscribe
+  --strip-think
 ```
 
 The agent:
@@ -187,8 +186,7 @@ Start:
 npm run keet:agent:start -- \
   --room-id <local-keet-room-id> \
   --base-url http://127.0.0.1:11435/v1 \
-  --model qwen3-4b \
-  --subscribe
+  --model qwen3-4b
 ```
 
 Or use environment variables:

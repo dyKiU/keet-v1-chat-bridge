@@ -167,23 +167,33 @@ test("parseCliOptions configures Keet live send command", () => {
   assert.equal(options.waitForResponse, true);
 });
 
-test("parseCliOptions configures Keet live watch command", () => {
+test("parseCliOptions configures Keet live watch command with subscribe by default", () => {
+  const options = parseCliOptions([
+    "keet-live-watch",
+    "--room-id",
+    "test-room-id-qvac",
+    "--once",
+  ]);
+
+  assert.equal(options.command, "keet-live-watch");
+  assert.equal(options.name, "keet-live-watch");
+  assert.equal(options.roomId, "test-room-id-qvac");
+  assert.equal(options.pollMs, undefined);
+  assert.equal(options.once, true);
+  assert.equal(options.subscribe, true);
+});
+
+test("parseCliOptions configures Keet live watch polling fallback", () => {
   const options = parseCliOptions([
     "keet-live-watch",
     "--room-id",
     "test-room-id-qvac",
     "--poll-ms",
     "1000",
-    "--once",
-    "--subscribe",
   ]);
 
-  assert.equal(options.command, "keet-live-watch");
-  assert.equal(options.name, "keet-live-watch");
-  assert.equal(options.roomId, "test-room-id-qvac");
   assert.equal(options.pollMs, 1000);
-  assert.equal(options.once, true);
-  assert.equal(options.subscribe, true);
+  assert.equal(options.subscribe, false);
 });
 
 test("parseCliOptions configures Keet live subscribe probe command", () => {
@@ -201,13 +211,11 @@ test("parseCliOptions configures Keet live subscribe probe command", () => {
   assert.equal(options.timeoutMs, 5000);
 });
 
-test("parseCliOptions configures Keet live agent command", () => {
+test("parseCliOptions configures Keet live agent command with subscribe by default", () => {
   const options = parseCliOptions([
     "keet-live-agent",
     "--room-id",
     "test-room-id-qvac",
-    "--poll-ms",
-    "1000",
     "--base-url",
     "http://127.0.0.1:11435/v1",
     "--model",
@@ -217,19 +225,43 @@ test("parseCliOptions configures Keet live agent command", () => {
     "--session-id",
     "room-test-123",
     "--strip-think",
-    "--subscribe",
   ]);
 
   assert.equal(options.command, "keet-live-agent");
   assert.equal(options.name, "keet-live-agent");
   assert.equal(options.roomId, "test-room-id-qvac");
-  assert.equal(options.pollMs, 1000);
+  assert.equal(options.pollMs, undefined);
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");
   assert.equal(options.thinkingModel, "hermes-agent/qwen3-4b");
   assert.equal(options.sessionId, "room-test-123");
   assert.equal(options.stripThink, true);
   assert.equal(options.subscribe, true);
+});
+
+test("parseCliOptions configures Keet live agent polling fallback", () => {
+  const options = parseCliOptions([
+    "keet-live-agent",
+    "--room-id",
+    "test-room-id-qvac",
+    "--poll-ms",
+    "1000",
+  ]);
+
+  assert.equal(options.pollMs, 1000);
+  assert.equal(options.subscribe, false);
+});
+
+test("parseCliOptions supports explicit no-subscribe escape hatch", () => {
+  const options = parseCliOptions([
+    "keet-live-agent",
+    "--room-id",
+    "test-room-id-qvac",
+    "--no-subscribe",
+  ]);
+
+  assert.equal(options.subscribe, false);
+  assert.equal(options.pollMs, undefined);
 });
 
 test("parseCliOptions requires a Keet room for welcome command", () => {

@@ -15,8 +15,7 @@ npm run keet:agent:start -- \
   --room-id <local-keet-room-id> \
   --base-url http://127.0.0.1:8642/v1 \
   --model hermes-agent \
-  --thinking-model hermes-agent/qwen3-4b \
-  --subscribe
+  --thinking-model hermes-agent/qwen3-4b
 ```
 
 Check status:

@@ -316,10 +316,10 @@ Observed against the local `qvac` test room:
 For incoming messages from paired devices, keep the Keet app closed and run the read-only watcher:
 
 ```sh
-npm run dev -- keet-live-watch --room-id <local-keet-room-id> --subscribe
+npm run dev -- keet-live-watch --room-id <local-keet-room-id>
 ```
 
-The watcher opens the installed Keet core, records the current highest chat sequence as a high-water mark, then subscribes with `core.subscribeChatMessages(roomId)`. The subscription emits full room message arrays, including an initial replay, so the watcher filters on later `seq` values and prints new messages as newline-delimited JSON events. If subscription behavior changes, fall back to polling with `--poll-ms 2000`. Use `--once` for a non-mutating startup smoke test:
+The watcher opens the installed Keet core, records the current highest chat sequence as a high-water mark, then subscribes with `core.subscribeChatMessages(roomId)` by default. The subscription emits full room message arrays, including an initial replay, so the watcher filters on later `seq` values and prints new messages as newline-delimited JSON events. If subscription behavior changes, fall back to polling with `--poll-ms 2000` or `--no-subscribe`. Use `--once` for a non-mutating startup smoke test:
 
 ```sh
 npm run dev -- keet-live-watch --room-id <local-keet-room-id> --once --timeout-ms 20000
@@ -328,15 +328,15 @@ npm run dev -- keet-live-watch --room-id <local-keet-room-id> --once --timeout-m
 To let the local QVAC server reply to new messages, run the agent:
 
 ```sh
-npm run dev -- keet-live-agent --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think --subscribe
+npm run dev -- keet-live-agent --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --strip-think
 ```
 
-The agent uses the same high-water mark, sends each new non-empty message to the OpenAI-compatible `/v1/chat/completions` endpoint, and posts replies back with a `[qvac]` prefix. It ignores messages that already start with `[qvac]` to avoid replying to itself. Polling mode remains available with `--poll-ms 2000`.
+The agent uses the same high-water mark, sends each new non-empty message to the OpenAI-compatible `/v1/chat/completions` endpoint, and posts replies back with a `[qvac]` prefix. It ignores messages that already start with `[qvac]` to avoid replying to itself. Subscription mode is the default; polling remains available with `--poll-ms 2000` or `--no-subscribe`.
 
 To run the agent in the background:
 
 ```sh
-npm run keet:agent:start -- --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b --subscribe
+npm run keet:agent:start -- --room-id <local-keet-room-id> --base-url http://127.0.0.1:11435/v1 --model qwen3-4b
 npm run keet:agent:status
 npm run keet:agent:logs
 npm run keet:agent:stop

@@ -53,8 +53,9 @@ QVAC:
 
 ## Docs
 
-- [Keet Bridge Operations](docs/ops.md): detailed commands, probes, local demos, and historical notes.
-- [Keet Example](docs/example.md): source-code map, safety model, private Keet API caveats, daemon runbook, and backend busy/error notes.
+- [Operations](docs/ops.md): detailed commands, probes, local demos, and historical notes.
+- [Example](docs/example.md): end-to-end Keet/QVAC live bridge example, daemon runbook, and backend busy/error notes.
+- [Bridge Internals](docs/bridge-internals.md): private Keet API surface, live-store guard behavior, implementation details, and current limits.
 
 ## Useful Scripts
 

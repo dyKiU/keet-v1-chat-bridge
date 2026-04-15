@@ -37,8 +37,8 @@ switch (command) {
 }
 
 async function start (args) {
-  const roomId = args.roomId ?? process.env.QVAC_KEET_ROOM_ID
-  if (!roomId) throw new Error('start requires --room-id <local-keet-room-id> or QVAC_KEET_ROOM_ID')
+  const roomId = args.roomId ?? process.env.KEET_ROOM_ID ?? process.env.QVAC_KEET_ROOM_ID
+  if (!roomId) throw new Error('start requires --room-id <local-keet-room-id> or KEET_ROOM_ID')
 
   const existing = await readState().catch(() => null)
   if (existing && isRunning(existing.agentPid)) {
@@ -59,23 +59,27 @@ async function start (args) {
     '--room-id',
     roomId,
     '--base-url',
-    args.baseUrl ?? process.env.QVAC_BASE_URL ?? 'http://127.0.0.1:11435/v1',
+    args.baseUrl ?? process.env.V1_CHAT_BASE_URL ?? process.env.QVAC_BASE_URL ?? 'http://127.0.0.1:11435/v1',
     '--model',
-    args.model ?? process.env.QVAC_MODEL ?? 'qwen3-4b'
+    args.model ?? process.env.V1_CHAT_MODEL ?? process.env.QVAC_MODEL ?? 'qwen3-4b'
   ]
 
-  if (args.subscribe ?? process.env.QVAC_KEET_SUBSCRIBE === 'true') {
-    agentArgs.push('--subscribe')
-  } else {
-    agentArgs.push('--poll-ms', String(args.pollMs ?? process.env.QVAC_KEET_POLL_MS ?? 2000))
+  if (args.thinkingModel ?? process.env.V1_CHAT_THINKING_MODEL) {
+    agentArgs.push('--thinking-model', args.thinkingModel ?? process.env.V1_CHAT_THINKING_MODEL)
   }
 
-  if (args.stripThink ?? process.env.QVAC_STRIP_THINK !== 'false') {
+  if (args.subscribe ?? (process.env.KEET_SUBSCRIBE ?? process.env.QVAC_KEET_SUBSCRIBE) === 'true') {
+    agentArgs.push('--subscribe')
+  } else {
+    agentArgs.push('--poll-ms', String(args.pollMs ?? process.env.KEET_POLL_MS ?? process.env.QVAC_KEET_POLL_MS ?? 2000))
+  }
+
+  if (args.stripThink ?? (process.env.V1_CHAT_STRIP_THINK ?? process.env.QVAC_STRIP_THINK) !== 'false') {
     agentArgs.push('--strip-think')
   }
 
-  if (args.system ?? process.env.QVAC_SYSTEM_PROMPT) {
-    agentArgs.push('--system', args.system ?? process.env.QVAC_SYSTEM_PROMPT)
+  if (args.system ?? process.env.V1_CHAT_SYSTEM_PROMPT ?? process.env.QVAC_SYSTEM_PROMPT) {
+    agentArgs.push('--system', args.system ?? process.env.V1_CHAT_SYSTEM_PROMPT ?? process.env.QVAC_SYSTEM_PROMPT)
   }
 
   const agent = spawn('npm', agentArgs, {
@@ -173,6 +177,9 @@ function parseArgs (argv) {
       case '--model':
         args.model = readValue(argv, ++index, arg)
         break
+      case '--thinking-model':
+        args.thinkingModel = readValue(argv, ++index, arg)
+        break
       case '--poll-ms':
         args.pollMs = Number(readValue(argv, ++index, arg))
         if (!Number.isFinite(args.pollMs) || args.pollMs <= 0) throw new Error('--poll-ms requires a positive number')
@@ -236,13 +243,16 @@ function usage () {
     'Usage: node scripts/keet-live-agent-daemon.mjs <start|stop|status|logs> [options]',
     '',
     'Start options:',
-    '  --room-id <id>       local Keet room id; alternatively QVAC_KEET_ROOM_ID',
-    '  --base-url <url>     default QVAC_BASE_URL or http://127.0.0.1:11435/v1',
-    '  --model <name>       default QVAC_MODEL or qwen3-4b',
-    '  --subscribe          use core.subscribeChatMessages; alternatively QVAC_KEET_SUBSCRIBE=true',
-    '  --poll-ms <ms>       polling fallback; default QVAC_KEET_POLL_MS or 2000',
-    '  --system <text>      optional system prompt; alternatively QVAC_SYSTEM_PROMPT',
+    '  --room-id <id>       local Keet room id; alternatively KEET_ROOM_ID or QVAC_KEET_ROOM_ID',
+    '  --base-url <url>     default V1_CHAT_BASE_URL, QVAC_BASE_URL, or http://127.0.0.1:11435/v1',
+    '  --model <name>       default V1_CHAT_MODEL, QVAC_MODEL, or qwen3-4b',
+    '  --thinking-model <label>  label for thinking marker; alternatively V1_CHAT_THINKING_MODEL',
+    '  --subscribe          use core.subscribeChatMessages; alternatively KEET_SUBSCRIBE=true or QVAC_KEET_SUBSCRIBE=true',
+    '  --poll-ms <ms>       polling fallback; default KEET_POLL_MS, QVAC_KEET_POLL_MS, or 2000',
+    '  --system <text>      optional system prompt; alternatively V1_CHAT_SYSTEM_PROMPT or QVAC_SYSTEM_PROMPT',
     '  --no-strip-think     do not pass --strip-think to the agent',
+    '',
+    'Legacy QVAC_* environment variable names are still accepted as fallbacks.',
     '',
     'Safety:',
     '  Keet must be closed on this Mac. The agent command still runs the live-store guard.'

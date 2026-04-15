@@ -40,11 +40,12 @@ test("shouldReply ignores qvac-prefixed assistant replies", () => {
 test("modelThinkingText includes the configured model name", () => {
   assert.equal(modelThinkingText("gemma4:26b"), "[gemma4:26b] is thinking...");
   assert.equal(modelThinkingText("qwen3-4b"), "[qwen3-4b] is thinking...");
+  assert.equal(modelThinkingText("hermes-agent/qwen3-4b"), "[hermes-agent/qwen3-4b] is thinking...");
 });
 
 test("formatAssistantReply prefixes non-empty replies and skips empty replies", () => {
-  assert.equal(formatAssistantReply("hello"), "[llm] hello");
-  assert.equal(formatAssistantReply("  hello  "), "[llm] hello");
+  assert.equal(formatAssistantReply("hello"), "[qvac] hello");
+  assert.equal(formatAssistantReply("  hello  "), "[qvac] hello");
   assert.equal(formatAssistantReply(""), undefined);
   assert.equal(formatAssistantReply("   "), undefined);
 });

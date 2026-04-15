@@ -212,6 +212,8 @@ test("parseCliOptions configures Keet live agent command", () => {
     "http://127.0.0.1:11435/v1",
     "--model",
     "qwen3-4b",
+    "--thinking-model",
+    "hermes-agent/qwen3-4b",
     "--session-id",
     "room-test-123",
     "--strip-think",
@@ -224,6 +226,7 @@ test("parseCliOptions configures Keet live agent command", () => {
   assert.equal(options.pollMs, 1000);
   assert.equal(options.baseUrl, "http://127.0.0.1:11435/v1");
   assert.equal(options.model, "qwen3-4b");
+  assert.equal(options.thinkingModel, "hermes-agent/qwen3-4b");
   assert.equal(options.sessionId, "room-test-123");
   assert.equal(options.stripThink, true);
   assert.equal(options.subscribe, true);

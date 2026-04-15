@@ -7,6 +7,7 @@ export interface KeetLiveAgentOptions extends OpenAiClientOptions {
   timeoutMs?: number | undefined;
   pollMs?: number | undefined;
   subscribe?: boolean | undefined;
+  thinkingModel?: string | undefined;
 }
 
 const ASSISTANT_PREFIX = "[qvac]";
@@ -38,6 +39,7 @@ export async function runKeetLiveAgent(options: KeetLiveAgentOptions): Promise<n
         transport: options.subscribe ? "subscribe" : "poll",
         pollMs: options.subscribe ? undefined : pollMs,
         model: options.model,
+        thinkingModel: options.thinkingModel,
       }, null, 2));
 
       if (options.subscribe) {
@@ -126,7 +128,7 @@ async function replyToMessage(
   message: KeetLiveChatMessage,
   timeoutMs: number,
 ): Promise<void> {
-  const thinkingText = modelThinkingText(options.model);
+  const thinkingText = modelThinkingText(options.thinkingModel ?? options.model);
   const answer = await collectAnswer(message.text, options, async () => {
     const result = await withTimeout(
       api.core.addChatMessage(options.roomId, thinkingText, {}),

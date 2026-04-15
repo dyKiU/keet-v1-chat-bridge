@@ -31,6 +31,7 @@ export interface CliOptions {
   apiKey?: string | undefined;
   sessionId?: string | undefined;
   systemPrompt?: string | undefined;
+  thinkingModel?: string | undefined;
   echo: boolean;
   textOnly: boolean;
   stripThink: boolean;
@@ -141,6 +142,9 @@ export function parseCliOptions(argv: string[]): CliOptions {
       case "--model":
         options.model = readValue(rest, ++index, arg);
         break;
+      case "--thinking-model":
+        options.thinkingModel = readValue(rest, ++index, arg);
+        break;
       case "--api-key":
         options.apiKey = readValue(rest, ++index, arg);
         break;
@@ -217,7 +221,7 @@ export function usage(): string {
     "  keet-live-send --room-id <local-keet-room-id> [--message <text>] [--linger-ms <ms>] [--wait-for-response] [--timeout-ms <ms>]",
     "  keet-live-subscribe-probe --room-id <local-keet-room-id> [--timeout-ms <ms>]",
     "  keet-live-watch --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--once] [--timeout-ms <ms>]",
-    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--session-id <id>] [--strip-think]",
+    "  keet-live-agent --room-id <local-keet-room-id> [--subscribe | --poll-ms <ms>] [--base-url <url>] [--model <name>] [--thinking-model <label>] [--session-id <id>] [--strip-think]",
     "  keet-readonly-probe [--keet-dump <path>] [--room <pear://keet/...>] [--timeout-ms <ms>]",
     "",
     "Defaults:",

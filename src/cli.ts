@@ -92,6 +92,7 @@ async function main(): Promise<void> {
       pollMs: options.pollMs,
       baseUrl: options.baseUrl,
       model: options.model,
+      thinkingModel: options.thinkingModel,
       apiKey: options.apiKey,
       sessionId: options.sessionId,
       systemPrompt: options.systemPrompt,

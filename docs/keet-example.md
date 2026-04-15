@@ -1,4 +1,4 @@
-# Keet/QVAC Live Bridge Notes
+# Keet Example
 
 This project can bridge a paired macOS Keet profile to a local QVAC/OpenAI-compatible chat server by launching the same Keet core worker that the Keet desktop GUI normally launches.
 

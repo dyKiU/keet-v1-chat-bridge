@@ -2,7 +2,7 @@
 
 Operational notes for the Keet/QVAC/Hermes bridge. The repository root README is intentionally short; keep detailed runbooks, probes, background demos, and historical experiments here.
 
-See [Keet/QVAC Live Bridge Notes](keet-qvac-live-bridge.md) for the source-code map, failed experiments, working live-store path, auth model, and daemon runbook.
+See [Keet Example](keet-example.md) for the source-code map, failed experiments, working live-store path, auth model, and daemon runbook.
 
 ## Local Echo Demo
 

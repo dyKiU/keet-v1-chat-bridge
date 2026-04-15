@@ -147,7 +147,7 @@ The full local demo can be started as background processes with PID and log stat
 This historical Pear/QVAC demo is not exposed as a top-level npm script anymore; run the helper directly when needed.
 
 ```sh
-node scripts/pear-qvac-demo.mjs start
+node scripts/demo/historical/pear-qvac-demo.mjs start
 ```
 
 This starts:
@@ -164,16 +164,16 @@ Runtime state is written under `.run/pear-qvac-demo/`:
 Useful commands:
 
 ```sh
-node scripts/pear-qvac-demo.mjs status
-node scripts/pear-qvac-demo.mjs logs
-node scripts/pear-qvac-demo.mjs logs -- pear
-node scripts/pear-qvac-demo.mjs stop
+node scripts/demo/historical/pear-qvac-demo.mjs status
+node scripts/demo/historical/pear-qvac-demo.mjs logs
+node scripts/demo/historical/pear-qvac-demo.mjs logs -- pear
+node scripts/demo/historical/pear-qvac-demo.mjs stop
 ```
 
 Environment overrides:
 
 ```sh
-QVAC_BASE_URL=http://127.0.0.1:11435/v1 QVAC_MODEL=qwen3-4b PEAR_NAME=pear-qvac node scripts/pear-qvac-demo.mjs start
+QVAC_BASE_URL=http://127.0.0.1:11435/v1 QVAC_MODEL=qwen3-4b PEAR_NAME=pear-qvac node scripts/demo/historical/pear-qvac-demo.mjs start
 ```
 
 The Pear terminal app normally wants a TTY. The background script runs it through macOS `script` so it gets a pseudo-terminal while logs still go to `.run/pear-qvac-demo/pear.log`.

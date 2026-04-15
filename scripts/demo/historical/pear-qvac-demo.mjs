@@ -7,8 +7,8 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-const rootDir = path.resolve(import.meta.dirname, '..')
-const stateDir = path.join(rootDir, '.run', 'pear-bridge-demo')
+const rootDir = path.resolve(import.meta.dirname, '../../..')
+const stateDir = path.join(rootDir, '.run', 'pear-qvac-demo')
 const stateFile = path.join(stateDir, 'state.json')
 const hostLog = path.join(stateDir, 'host.log')
 const pearLog = path.join(stateDir, 'pear.log')
@@ -58,9 +58,9 @@ async function start () {
     '--',
     'host',
     '--base-url',
-    process.env.V1_CHAT_BASE_URL ?? 'http://127.0.0.1:11435/v1',
+    process.env.QVAC_BASE_URL ?? 'http://127.0.0.1:11435/v1',
     '--model',
-    process.env.V1_CHAT_MODEL ?? 'qwen3-4b',
+    process.env.QVAC_MODEL ?? 'qwen3-4b',
     '--strip-think'
   ], {
     cwd: rootDir,
@@ -77,7 +77,7 @@ async function start () {
   const pear = spawn('sh', [
     '-c',
     'tail -f /dev/null | script -q /dev/null "$@"',
-    'pear-bridge-script',
+    'pear-qvac-script',
     pearBin,
     'run',
     '--dev',
@@ -86,7 +86,7 @@ async function start () {
     '.',
     topic,
     '--name',
-    process.env.PEAR_NAME ?? 'pear-v1-chat'
+    process.env.PEAR_NAME ?? 'pear-qvac'
   ], {
     cwd: path.join(rootDir, 'pear-terminal'),
     detached: true,
@@ -105,7 +105,7 @@ async function start () {
     startedAt: new Date().toISOString()
   })
 
-  console.log(`Started chat host pid ${host.pid}`)
+  console.log(`Started QVAC host pid ${host.pid}`)
   console.log(`Started Pear terminal pid ${pear.pid}`)
   console.log(`topic: ${topic}`)
   console.log(`logs: ${hostLog}`)
@@ -207,12 +207,12 @@ async function sleep (ms) {
 
 function usage () {
   return [
-    'Usage: node scripts/pear-bridge-demo.mjs <start|stop|status|logs>',
+    'Usage: node scripts/demo/historical/pear-qvac-demo.mjs <start|stop|status|logs>',
     '',
     'Environment:',
-    '  V1_CHAT_BASE_URL  default http://127.0.0.1:11435/v1',
-    '  V1_CHAT_MODEL     default qwen3-4b',
-    '  PEAR_NAME      default pear-v1-chat',
+    '  QVAC_BASE_URL  default http://127.0.0.1:11435/v1',
+    '  QVAC_MODEL     default qwen3-4b',
+    '  PEAR_NAME      default pear-qvac',
     `  PEAR_BIN       default ${pearBin}`
   ].join('\n')
 }

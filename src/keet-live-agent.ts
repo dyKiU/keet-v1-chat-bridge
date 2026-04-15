@@ -149,7 +149,16 @@ async function replyToMessage(
   });
   if (answer === undefined) return;
 
-  const text = `${ASSISTANT_PREFIX} ${answer}`;
+  const text = formatAssistantReply(answer);
+  if (!text) {
+    console.log(JSON.stringify({
+      event: "empty_reply",
+      inReplyToSeq: message.seq,
+      model: options.model,
+    }));
+    return;
+  }
+
   const result = await withTimeout(
     api.core.addChatMessage(options.roomId, text, {}),
     timeoutMs,
@@ -194,6 +203,11 @@ export async function collectAnswer(
   }
 
   return chunks.join("").trim();
+}
+
+export function formatAssistantReply(answer: string): string | undefined {
+  const trimmed = answer.trim();
+  return trimmed ? `${ASSISTANT_PREFIX} ${trimmed}` : undefined;
 }
 
 export function thinkingText(): string {

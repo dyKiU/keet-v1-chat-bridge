@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { collectAnswer, modelThinkingText, shouldReply, thinkingText } from "../src/keet-live-agent.js";
+import { collectAnswer, formatAssistantReply, modelThinkingText, shouldReply, thinkingText } from "../src/keet-live-agent.js";
 import { newestSeq, summarizeKeetChatMessages } from "../src/keet-live-messages.js";
 
 test("summarizeKeetChatMessages extracts text from Keet chat shapes", () => {
@@ -40,6 +40,13 @@ test("shouldReply ignores qvac-prefixed assistant replies", () => {
 test("modelThinkingText includes the configured model name", () => {
   assert.equal(modelThinkingText("gemma4:26b"), "[gemma4:26b] is thinking...");
   assert.equal(modelThinkingText("qwen3-4b"), "[qwen3-4b] is thinking...");
+});
+
+test("formatAssistantReply prefixes non-empty replies and skips empty replies", () => {
+  assert.equal(formatAssistantReply("hello"), "[llm] hello");
+  assert.equal(formatAssistantReply("  hello  "), "[llm] hello");
+  assert.equal(formatAssistantReply(""), undefined);
+  assert.equal(formatAssistantReply("   "), undefined);
 });
 
 test("collectAnswer does not show thinking when QVAC fails before streaming", async () => {

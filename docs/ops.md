@@ -145,7 +145,7 @@ The stock iPhone Keet app still cannot use this unless it speaks this bridge pro
 The full local demo can be started as background processes with PID and log state:
 
 ```sh
-npm run pear:qvac:start
+node scripts/pear-qvac-demo.mjs start
 ```
 
 This starts:
@@ -162,16 +162,16 @@ Runtime state is written under `.run/pear-qvac-demo/`:
 Useful commands:
 
 ```sh
-npm run pear:qvac:status
-npm run pear:qvac:logs
-npm run pear:qvac:logs -- pear
-npm run pear:qvac:stop
+node scripts/pear-qvac-demo.mjs status
+node scripts/pear-qvac-demo.mjs logs
+node scripts/pear-qvac-demo.mjs logs -- pear
+node scripts/pear-qvac-demo.mjs stop
 ```
 
 Environment overrides:
 
 ```sh
-QVAC_BASE_URL=http://127.0.0.1:11435/v1 QVAC_MODEL=qwen3-4b PEAR_NAME=pear-qvac npm run pear:qvac:start
+QVAC_BASE_URL=http://127.0.0.1:11435/v1 QVAC_MODEL=qwen3-4b PEAR_NAME=pear-qvac node scripts/pear-qvac-demo.mjs start
 ```
 
 The Pear terminal app normally wants a TTY. The background script runs it through macOS `script` so it gets a pseudo-terminal while logs still go to `.run/pear-qvac-demo/pear.log`.

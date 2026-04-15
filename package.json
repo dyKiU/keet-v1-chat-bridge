@@ -11,10 +11,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli.ts",
-    "pear:qvac:start": "node scripts/pear-qvac-demo.mjs start",
-    "pear:qvac:stop": "node scripts/pear-qvac-demo.mjs stop",
-    "pear:qvac:status": "node scripts/pear-qvac-demo.mjs status",
-    "pear:qvac:logs": "node scripts/pear-qvac-demo.mjs logs",
     "keet:agent:start": "node scripts/keet-live-agent-daemon.mjs start",
     "keet:agent:stop": "node scripts/keet-live-agent-daemon.mjs stop",
     "keet:agent:status": "node scripts/keet-live-agent-daemon.mjs status",

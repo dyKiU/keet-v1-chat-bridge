@@ -144,6 +144,39 @@ The agent:
 - sends new user messages to `/v1/chat/completions`
 - posts replies back into the Keet room with a `[qvac]` prefix
 
+### Backend Busy and Error Reporting
+
+Hermes and QVAC are both consumed here through OpenAI-compatible HTTP endpoints. In the current bridge, there is no separate backend capacity API or explicit "busy" signal wired into the Keet agent.
+
+Known endpoint behavior:
+
+- Hermes exposes `GET /health`, which can report that the Hermes platform process is up.
+- Hermes and QVAC expose `GET /v1/models`, which can report that the OpenAI-compatible server is reachable.
+- Neither check proves that the next LLM inference request can be accepted immediately.
+
+Current bridge behavior:
+
+- `streamChatCompletion()` throws when `/v1/chat/completions` returns a non-2xx HTTP status.
+- It also surfaces connection failures, timeouts, and stream failures as thrown errors.
+- `replyToMessage()` catches those failures and logs a `reply_error` JSON event.
+- The agent does not currently post a visible Keet room message when inference cannot be handled.
+
+Recommended bridge-level behavior:
+
+- Treat HTTP `429` as busy or rate limited.
+- Treat HTTP `503` as backend unavailable or overloaded.
+- Treat HTTP `504` and request timeouts as inference timed out.
+- Treat connection errors such as `ECONNREFUSED` as backend offline.
+- Treat a stream that fails after response acceptance as an interrupted inference.
+
+A practical user-facing fallback would be for the agent to post a short Keet message such as:
+
+```text
+[qvac] Backend is busy or unavailable right now. Please try again in a moment.
+```
+
+This can be implemented entirely in the bridge by classifying errors from `streamChatCompletion()` and posting a fallback message from `replyToMessage()`. It does not require a new Hermes or QVAC API, although a future backend-specific queue or capacity endpoint would allow more precise status.
+
 ## Daemon Wrapper
 
 The daemon wrapper starts the same agent in the background and stores PID/log state under `.run/keet-live-agent/`.

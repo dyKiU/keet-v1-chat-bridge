@@ -144,6 +144,8 @@ The stock iPhone Keet app still cannot use this unless it speaks this bridge pro
 
 The full local demo can be started as background processes with PID and log state:
 
+This historical Pear/QVAC demo is not exposed as a top-level npm script anymore; run the helper directly when needed.
+
 ```sh
 node scripts/pear-qvac-demo.mjs start
 ```

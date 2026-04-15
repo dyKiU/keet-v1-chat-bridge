@@ -1,10 +1,11 @@
 {
-  "name": "qvac-hyperswarm-bridge",
+  "name": "keet-v1-chat-bridge",
   "version": "1.0.0",
-  "description": "Local Hyperswarm bridge for QVAC OpenAI-compatible chat completions",
+  "description": "Bridge Keet rooms to OpenAI-compatible v1 chat completions",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
+    "keet-v1-chat-bridge": "dist/cli.js",
     "qvac-hyperswarm-bridge": "dist/cli.js"
   },
   "scripts": {

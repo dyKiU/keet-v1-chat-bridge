@@ -68,7 +68,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
     rawCommand !== "keet-live-agent" &&
     rawCommand !== "keet-readonly-probe"
   ) {
-    throw new Error(`Usage: qvac-hyperswarm-bridge <host|client|probe|post|keet-welcome|keet-rpc-probe|keet-live-store-guard|keet-live-readonly-probe|keet-live-send|keet-live-subscribe-probe|keet-live-watch|keet-live-agent|keet-readonly-probe> [options]\n${usage()}`);
+    throw new Error(`Usage: keet-v1-chat-bridge <host|client|probe|post|keet-welcome|keet-rpc-probe|keet-live-store-guard|keet-live-readonly-probe|keet-live-send|keet-live-subscribe-probe|keet-live-watch|keet-live-agent|keet-readonly-probe> [options]\n${usage()}`);
   }
 
   const defaults = getDefaults();

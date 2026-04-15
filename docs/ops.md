@@ -134,7 +134,7 @@ This is useful for local scripts, test harnesses, or a future UI process that ca
 If a UI process can run local commands, the integration point is:
 
 ```sh
-cd $HOME/project/qvac-hyperswarm-bridge
+cd $HOME/project/keet-v1-chat-bridge
 npm run dev -- post --topic PASTE_TOPIC_HERE --ask 'hello from the UI process'
 ```
 

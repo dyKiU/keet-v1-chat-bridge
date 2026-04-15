@@ -62,5 +62,6 @@ QVAC:
 ```sh
 npm test
 npm run typecheck
+npx tsc -p tsconfig.json
 npm run dev -- keet-live-store-guard
 ```
